@@ -1,7 +1,10 @@
 ﻿using CosmoRate.Api.Data;
 using CosmoRate.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+
 
 namespace CosmoRate.Api.Controllers;
 
@@ -37,9 +40,14 @@ public class ReviewsController : ControllerBase
     }
 
     // POST /api/Reviews  -> tworzy recenzję w statusie Pending
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<Review>> Create([FromBody] Review r)
     {
+        var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null) return Unauthorized();
+        var userId = int.Parse(userIdClaim.Value);
+
         if (r == null) return BadRequest("Body is required.");
         if (r.Rating < 1 || r.Rating > 5) return BadRequest("Rating must be 1..5.");
         if (string.IsNullOrWhiteSpace(r.Title)) return BadRequest("Title is required.");
@@ -48,7 +56,8 @@ public class ReviewsController : ControllerBase
         var productOk = await _db.Products.AnyAsync(p => p.Id == r.ProductId);
         if (!productOk) return BadRequest("Invalid productId.");
 
-        // (na razie) UserId przychodzi w body; po JWT pobierzemy z tokena
+        
+        r.UserId = userId;
         r.Status = "Pending";
         r.CreatedAt = DateTime.UtcNow;
 
@@ -59,6 +68,7 @@ public class ReviewsController : ControllerBase
     }
 
     // PUT /api/Reviews/10/approve  -> zmiana statusu na Approved
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}/approve")]
     public async Task<IActionResult> Approve(int id)
     {
@@ -72,6 +82,7 @@ public class ReviewsController : ControllerBase
     }
 
     // PUT /api/Reviews/10/reject  -> zmiana statusu na Rejected
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}/reject")]
     public async Task<IActionResult> Reject(int id)
     {

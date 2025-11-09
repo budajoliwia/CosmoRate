@@ -39,8 +39,26 @@ public class CategoriesController: ControllerBase
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(GetById), new { id = c.Id }, c);
     }
-        //DELETE /api/Categories/5
-        [HttpDelete("{id:int}")]
+
+    // PUT /api/categories/5
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] Category dto)
+    {
+        if (dto == null) return BadRequest("Body is required.");
+        if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name is required.");
+
+        var cat = await _db.Categories.FindAsync(id);
+        if (cat == null) return NotFound();
+
+        cat.Name = dto.Name;
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+
+    //DELETE /api/Categories/5
+    [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             var c = await _db.Categories.FindAsync(id);
