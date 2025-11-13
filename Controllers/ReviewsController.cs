@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using CosmoRate.Api.DTOs;
+
+
 
 
 namespace CosmoRate.Api.Controllers;
@@ -17,6 +20,7 @@ public class ReviewsController : ControllerBase
 
     // GET /api/Reviews/product/5  -> zwraca tylko Approved
     [HttpGet("product/{productId:int}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetForProduct(int productId)
     {
         var exists = await _db.Products.AnyAsync(p => p.Id == productId);
@@ -42,29 +46,43 @@ public class ReviewsController : ControllerBase
     // POST /api/Reviews  -> tworzy recenzję w statusie Pending
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Review>> Create([FromBody] Review r)
+    public async Task<ActionResult<Review>> Create([FromBody] CreateReviewDto dto)
+
     {
-        var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-        if (userIdClaim == null) return Unauthorized();
-        var userId = int.Parse(userIdClaim.Value);
+        if (dto == null) return BadRequest("Body is required.");
+        if (dto.Rating < 1 || dto.Rating > 5) return BadRequest("Rating must be 1..5.");
+        if (string.IsNullOrWhiteSpace(dto.Title)) return BadRequest("Title is required.");
+        if (string.IsNullOrWhiteSpace(dto.Body)) return BadRequest("Body is required.");
 
-        if (r == null) return BadRequest("Body is required.");
-        if (r.Rating < 1 || r.Rating > 5) return BadRequest("Rating must be 1..5.");
-        if (string.IsNullOrWhiteSpace(r.Title)) return BadRequest("Title is required.");
-        if (string.IsNullOrWhiteSpace(r.Body)) return BadRequest("Body is required.");
-
-        var productOk = await _db.Products.AnyAsync(p => p.Id == r.ProductId);
+        // czy produkt istnieje
+        var productOk = await _db.Products.AnyAsync(p => p.Id == dto.ProductId);
         if (!productOk) return BadRequest("Invalid productId.");
 
-        
-        r.UserId = userId;
-        r.Status = "Pending";
-        r.CreatedAt = DateTime.UtcNow;
+        // UserId z tokena
+        var userIdClaim =
+            User.FindFirst("sub") ??
+            User.FindFirst(ClaimTypes.NameIdentifier);
 
-        _db.Reviews.Add(r);
+        if (userIdClaim == null)
+            return Unauthorized("User id is not found in token.");
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        var review = new Review
+        {
+            ProductId = dto.ProductId,
+            Title = dto.Title,
+            Body = dto.Body,
+            Rating = dto.Rating,
+            UserId = userId,
+            Status = "Pending",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetForProduct), new { productId = r.ProductId }, r);
+        return CreatedAtAction(nameof(GetForProduct), new { productId = review.ProductId }, review);
     }
 
     // PUT /api/Reviews/10/approve  -> zmiana statusu na Approved

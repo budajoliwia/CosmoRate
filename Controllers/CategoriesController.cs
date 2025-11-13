@@ -2,9 +2,12 @@
 using CosmoRate.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace CosmoRate.Api.Controllers;
 
+[Authorize(Roles ="Admin")]
 [ApiController]
 [Route("api/[controller]")]
 public class CategoriesController: ControllerBase

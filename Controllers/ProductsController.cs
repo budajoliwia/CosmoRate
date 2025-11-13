@@ -2,6 +2,10 @@
 using CosmoRate.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using CosmoRate.Api.DTOs;
+
+
 
 namespace CosmoRate.Api.Controllers;
 
@@ -14,6 +18,7 @@ public class ProductsController : ControllerBase
 
     // GET /api/Products
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<object>>> GetAll()
     {
         var items = await _db.Products
@@ -32,6 +37,7 @@ public class ProductsController : ControllerBase
 
     // GET /api/Products/{id}
     [HttpGet("{id:int}")]
+    [AllowAnonymous]
     public async Task<ActionResult<object>> GetById(int id)
     {
         var p = await _db.Products
@@ -53,24 +59,35 @@ public class ProductsController : ControllerBase
 
     // POST /api/Products
     [HttpPost]
-    public async Task<ActionResult<Product>> Create([FromBody] Product p)
+    [Authorize(Roles ="Admin")]
+    public async Task<ActionResult> Create([FromBody] CreateProductDto dto)
     {
-        if (p == null) return BadRequest("Body is required.");
-        if (string.IsNullOrWhiteSpace(p.Name)) return BadRequest("Name is required.");
-        if (string.IsNullOrWhiteSpace(p.Brand)) return BadRequest("Brand is required.");
+        if (dto == null) return BadRequest("Body is required.");
+        if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name is required.");
+        if (string.IsNullOrWhiteSpace(dto.Brand)) return BadRequest("Brand is required.");
 
         // kategoria musi istnieć
-        var categoryExists = await _db.Categories.AnyAsync(c => c.Id == p.CategoryId);
+        var categoryExists = await _db.Categories.AnyAsync(c => c.Id == dto.CategoryId);
         if (!categoryExists) return BadRequest("Invalid categoryId – category does not exist.");
+
+        // mapowanie DTO -> encja
+        var p = new Product
+        {
+            Name = dto.Name,
+            Brand = dto.Brand,
+            CategoryId = dto.CategoryId
+        };
 
         _db.Products.Add(p);
         await _db.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetById), new { id = p.Id }, p);
+    
     }
 
     // PUT /api/Products/{id}
     [HttpPut("{id:int}")]
+    [Authorize(Roles ="Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] Product dto)
     {
         if (dto == null) return BadRequest("Body is required.");
@@ -97,6 +114,7 @@ public class ProductsController : ControllerBase
 
     // DELETE /api/Products/{id}
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var product = await _db.Products.FindAsync(id);
