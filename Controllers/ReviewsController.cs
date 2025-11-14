@@ -1,10 +1,11 @@
 ﻿using CosmoRate.Api.Data;
+using CosmoRate.Api.DTOs;
 using CosmoRate.Api.Models;
+using CosmoRate.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using CosmoRate.Api.DTOs;
 
 
 
@@ -16,7 +17,12 @@ namespace CosmoRate.Api.Controllers;
 public class ReviewsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    public ReviewsController(AppDbContext db) => _db = db;
+    private readonly ILogService _logger;
+    public ReviewsController(AppDbContext db, ILogService logger)
+    {
+        _db = db;
+        _logger = logger;
+    }
 
     // GET /api/Reviews/product/5  -> zwraca tylko Approved
     [HttpGet("product/{productId:int}")]
@@ -79,8 +85,12 @@ public class ReviewsController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
+
+
         _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
+
+        await _logger.LogAsync(userId, "AddReview", $"ReviewId={review.Id}");
 
         return CreatedAtAction(nameof(GetForProduct), new { productId = review.ProductId }, review);
     }
@@ -96,6 +106,13 @@ public class ReviewsController : ControllerBase
         rev.Status = "Approved";
         await _db.SaveChangesAsync();
 
+        //LOG 
+        var adminId = int.Parse(
+            User.FindFirst("sub")?.Value ??
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+        await _logger.LogAsync(adminId, "ApproveReview", $"ReviewId={rev.Id}");
+
         return NoContent();
     }
 
@@ -109,6 +126,14 @@ public class ReviewsController : ControllerBase
 
         rev.Status = "Rejected";
         await _db.SaveChangesAsync();
+
+        //LOG 
+        var adminId = int.Parse(
+       User.FindFirst("sub")?.Value ??
+       User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+   );
+
+        await _logger.LogAsync(adminId, "RejectReview", $"ReviewId={rev.Id}");
 
         return NoContent();
     }

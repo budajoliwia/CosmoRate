@@ -52,6 +52,8 @@ builder.Services.AddSwaggerGen(c =>
 
 // 3. Nasze serwisy
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ILogService, LogService>();
+
 
 // 4. AUTH / JWT
 builder.Services

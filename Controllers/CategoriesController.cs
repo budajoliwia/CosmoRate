@@ -3,6 +3,9 @@ using CosmoRate.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using CosmoRate.Api.Services;
+using System.Security.Claims;
+
 
 
 namespace CosmoRate.Api.Controllers;
@@ -13,7 +16,18 @@ namespace CosmoRate.Api.Controllers;
 public class CategoriesController: ControllerBase
 {
     private readonly AppDbContext _db;
-    public CategoriesController(AppDbContext db) => _db = db;
+    private readonly ILogService _logger;
+    public CategoriesController(AppDbContext db, ILogService logger)
+    {
+        _db = db;
+        _logger = logger;
+    }
+    private int? GetUserId()
+    {
+        var claim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+        if (claim == null) return null;
+        return int.Parse(claim.Value);
+    }
 
     //GET /api/Categories
     [HttpGet]
@@ -40,6 +54,10 @@ public class CategoriesController: ControllerBase
 
         _db.Categories.Add(c);
         await _db.SaveChangesAsync();
+
+        var userId = GetUserId();
+        await _logger.LogAsync(userId, "CreateCategory", $"CategoryId={c.Id}, Name={c.Name}");
+
         return CreatedAtAction(nameof(GetById), new { id = c.Id }, c);
     }
 
@@ -56,6 +74,10 @@ public class CategoriesController: ControllerBase
         cat.Name = dto.Name;
         await _db.SaveChangesAsync();
 
+        var userId = GetUserId();
+        await _logger.LogAsync(userId, "UpdateCategory", $"CategoryId={cat.Id}");
+
+
         return NoContent();
     }
 
@@ -68,7 +90,11 @@ public class CategoriesController: ControllerBase
             if (c == null) return NotFound();
             _db.Categories.Remove(c);
             await _db.SaveChangesAsync();
-            return NoContent();
+
+        var userId = GetUserId();
+        await _logger.LogAsync(userId, "DeleteCategory", $"CategoryId={id}");
+
+        return NoContent();
         }
     
 }

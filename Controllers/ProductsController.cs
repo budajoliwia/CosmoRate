@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using CosmoRate.Api.DTOs;
+using CosmoRate.Api.Services;
+using System.Security.Claims;
+
 
 
 
@@ -14,7 +17,19 @@ namespace CosmoRate.Api.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    public ProductsController(AppDbContext db) => _db = db;
+    private readonly ILogService _logger;
+    public ProductsController(AppDbContext db, ILogService logger)
+    {
+        _db = db;
+        _logger = logger;
+
+    }
+    private int? GetUserId()
+    {
+        var claim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+        if (claim == null) return null;
+        return int.Parse(claim.Value);
+    }
 
     // GET /api/Products
     [HttpGet]
@@ -81,6 +96,10 @@ public class ProductsController : ControllerBase
         _db.Products.Add(p);
         await _db.SaveChangesAsync();
 
+        var userId = GetUserId();
+        await _logger.LogAsync(userId, "CreateProduct", $"ProductId={p.Id}, Name={p.Name}");
+
+
         return CreatedAtAction(nameof(GetById), new { id = p.Id }, p);
     
     }
@@ -109,6 +128,10 @@ public class ProductsController : ControllerBase
         product.CategoryId = dto.CategoryId;
 
         await _db.SaveChangesAsync();
+
+        var userId = GetUserId();
+        await _logger.LogAsync(userId, "UpdateProduct", $"ProductId={product.Id}");
+
         return NoContent(); // 204
     }
 
@@ -122,6 +145,12 @@ public class ProductsController : ControllerBase
 
         _db.Products.Remove(product);
         await _db.SaveChangesAsync();
+
+        var userId = GetUserId();
+        await _logger.LogAsync(userId, "DeleteProduct", $"ProductId={id}");
+
+
+
         return NoContent(); // 204
     }
 }
