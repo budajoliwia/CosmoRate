@@ -1,10 +1,10 @@
 using CosmoRate.Api.Data;
-using Microsoft.EntityFrameworkCore;
 using CosmoRate.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models; 
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +81,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>(); 
+
 
 app.UseHttpsRedirection();
 
