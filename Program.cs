@@ -1,5 +1,6 @@
 using CosmoRate.Api.Data;
 using CosmoRate.Api.Services;
+using CosmoRate.Api.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
