@@ -9,6 +9,20 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//CORS
+var corsPolicy = "CorsPolicy";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicy, policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 // 1. DbContext
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -75,6 +89,7 @@ builder.Services
     });
 
 var app = builder.Build();
+app.UseCors(corsPolicy);
 
 // 5. Middleware
 if (app.Environment.IsDevelopment())
