@@ -4,11 +4,12 @@ import { Routes, Route, Navigate, Link } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import ProductsPage from "./components/ProductsPage";
 import ProductDetailsPage from "./components/ProductDetailsPage";
-import { useAuth } from "./auth";
+import AdminDashboardPage from "./components/AdminDashboardPage";
+import * as auth from "./auth";
 import "./App.css";
 
 const App: React.FC = () => {
-  const { isAuthenticated,  logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = auth.useAuth();
 
   return (
     <div className="app">
@@ -16,13 +17,11 @@ const App: React.FC = () => {
         <h1>CosmoRate</h1>
         <nav>
           <Link to="/products">Produkty</Link>
+          {isAdmin && <Link to="/admin">Panel admina</Link>}
           {isAuthenticated ? (
-            <>
-              {/* Tu potem dodamy linki admina, jeśli chcesz */}
-              <button onClick={logout} className="logout-btn">
-                Wyloguj
-              </button>
-            </>
+            <button onClick={logout} className="logout-btn">
+              Wyloguj
+            </button>
           ) : (
             <Link to="/login">Zaloguj</Link>
           )}
@@ -35,7 +34,21 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
-          {/* tu kiedyś dodamy ścieżki dla admina */}
+
+          {/* Ochrona trasy admina bez dodatkowego komponentu */}
+          <Route
+            path="/admin"
+            element={
+              isAdmin ? (
+                <AdminDashboardPage />
+              ) : isAuthenticated ? (
+                <Navigate to="/products" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
           <Route path="*" element={<Navigate to="/products" replace />} />
         </Routes>
       </main>

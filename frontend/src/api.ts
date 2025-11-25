@@ -5,6 +5,7 @@ import type {
   ProductListItem,
   ReviewItem,
   CreateReviewDto,
+  ReportsSummary,
 } from "./type";
 
 const BASE_URL = "https://localhost:7080/api"; // backend
@@ -65,6 +66,10 @@ export async function apiGetReviewsForProduct(
   productId: number
 ): Promise<ReviewItem[]> {
   return request<ReviewItem[]>(`/reviews/product/${productId}`);
+}
+
+export async function apiGetReportsSummary(): Promise<ReportsSummary> {
+  return request<ReportsSummary>("/reports/summary");
 }
 
 export async function apiCreateReview(dto: CreateReviewDto): Promise<void> {
