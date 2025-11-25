@@ -7,6 +7,8 @@ import ProductDetailsPage from "./components/ProductDetailsPage";
 import AdminDashboardPage from "./components/AdminDashboardPage";
 import * as auth from "./auth";
 import "./App.css";
+import {AdminProductsPage} from "./components/AdminProductsPage";
+
 
 const App: React.FC = () => {
   const { isAuthenticated, isAdmin, logout } = auth.useAuth();
@@ -16,16 +18,21 @@ const App: React.FC = () => {
       <header className="app-header">
         <h1>CosmoRate</h1>
         <nav>
-          <Link to="/products">Produkty</Link>
-          {isAdmin && <Link to="/admin">Panel admina</Link>}
-          {isAuthenticated ? (
-            <button onClick={logout} className="logout-btn">
-              Wyloguj
-            </button>
-          ) : (
-            <Link to="/login">Zaloguj</Link>
-          )}
-        </nav>
+  <Link to="/products">Produkty</Link>
+  {isAdmin && (
+    <>
+      <Link to="/admin">Panel admina</Link>
+      <Link to="/admin/products">Produkty (admin)</Link>
+    </>
+  )}
+  {isAuthenticated ? (
+    <button onClick={logout} className="logout-btn">
+      Wyloguj
+    </button>
+  ) : (
+    <Link to="/login">Zaloguj</Link>
+  )}
+</nav>
       </header>
 
       <main className="app-main">
@@ -45,6 +52,18 @@ const App: React.FC = () => {
                 <Navigate to="/products" replace />
               ) : (
                 <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+             path="/admin/products"
+              element={
+                isAdmin ? (
+                  <AdminProductsPage />
+             ) : isAuthenticated ? (
+              <Navigate to="/products" replace />
+             ) : (
+               <Navigate to="/login" replace />
               )
             }
           />

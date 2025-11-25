@@ -6,6 +6,8 @@ import type {
   ReviewItem,
   CreateReviewDto,
   ReportsSummary,
+  Category,
+  CreateProductDto
 } from "./type";
 
 const BASE_URL = "https://localhost:7080/api"; // backend
@@ -78,3 +80,31 @@ export async function apiCreateReview(dto: CreateReviewDto): Promise<void> {
     body: JSON.stringify(dto),
   });
 }
+
+// ===== CATEGORIES (ADMIN) =====
+export async function apiGetCategories(): Promise<Category[]> {
+    return request<Category[]>("/categories");
+}
+// ===== PRODUCTS (ADMIN) =====
+export async function apiCreateProduct(dto: CreateProductDto):Promise<void> {
+    await request("/products",{
+        method:"POST",
+        body:JSON.stringify(dto),
+    });
+}
+
+export async function apiUpdateProduct(
+    id:number,
+    dto:CreateProductDto): Promise<void>{
+        await request(`/products/${id}`,{
+            method:"PUT",
+            body:JSON.stringify(dto),
+        });
+    }
+
+    export async function apiDeleteProduct(id:number):Promise<void>{
+        await request(`/products/${id}`,{
+            method:"DELETE",
+        });
+
+    }
