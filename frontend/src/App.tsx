@@ -1,35 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import React from "react";
+import { Routes, Route, Navigate, Link } from "react-router-dom";
+import LoginPage from "./components/LoginPage";
+import ProductsPage from "./components/ProductsPage";
+import ProductDetailsPage from "./components/ProductDetailsPage";
+import { useAuth } from "./auth";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const { isAuthenticated,  logout } = useAuth();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="app">
+      <header className="app-header">
+        <h1>CosmoRate</h1>
+        <nav>
+          <Link to="/products">Produkty</Link>
+          {isAuthenticated ? (
+            <>
+              {/* Tu potem dodamy linki admina, jeśli chcesz */}
+              <button onClick={logout} className="logout-btn">
+                Wyloguj
+              </button>
+            </>
+          ) : (
+            <Link to="/login">Zaloguj</Link>
+          )}
+        </nav>
+      </header>
 
-export default App
+      <main className="app-main">
+        <Routes>
+          <Route path="/" element={<Navigate to="/products" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/:id" element={<ProductDetailsPage />} />
+          {/* tu kiedyś dodamy ścieżki dla admina */}
+          <Route path="*" element={<Navigate to="/products" replace />} />
+        </Routes>
+      </main>
+    </div>
+  );
+};
+
+export default App;
