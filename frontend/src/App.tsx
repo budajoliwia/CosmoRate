@@ -10,10 +10,9 @@ import "./App.css";
 import {AdminProductsPage} from "./components/AdminProductsPage";
 import AdminCategoriesPage from "./components/AdminCategoriesPage";
 import RegisterPage from "./components/RegisterPage";
-import MyReviewsPage from "./components/MyReviewsPage";
+import ProfilePage from "./components/ProfilePage";
 import AdminReviewsPage from "./components/AdminReviewsPage";
-
-
+import { RequireAuth } from "./auth";
 
 
 
@@ -37,7 +36,8 @@ const App: React.FC = () => {
   )}
   {isAuthenticated ? (
    <>
-    <Link to="/my/reviews">Moje recenzje</Link>
+    <Link to="/profile">Mój profil</Link>
+
     {" | "}
     <button onClick={logout} className="logout-btn">
       Wyloguj
@@ -60,7 +60,9 @@ const App: React.FC = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
-          
+          <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth> }/>
+
+
           {/* Ochrona trasy admina bez dodatkowego komponentu */}
           <Route
             path="/admin"
@@ -98,16 +100,7 @@ const App: React.FC = () => {
               )
             }
           />
-          <Route
-            path="/my/reviews"
-            element={
-              isAuthenticated ? (
-                <MyReviewsPage />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+          
           <Route
             path="/admin/reviews"
             element={
