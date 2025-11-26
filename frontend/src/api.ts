@@ -7,7 +7,8 @@ import type {
   CreateReviewDto,
   ReportsSummary,
   Category,
-  CreateProductDto
+  CreateProductDto,
+  RegisterRequest
 } from "./type";
 
 const BASE_URL = "https://localhost:7080/api"; // backend
@@ -49,6 +50,12 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 // ===== AUTH =====
 export async function apiLogin(data: LoginRequest): Promise<LoginResponse> {
   return request<LoginResponse>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+export async function apiRegister(data: RegisterRequest): Promise<void> {
+  await request("/auth/register", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -108,3 +115,27 @@ export async function apiUpdateProduct(
         });
 
     }
+// ===== CATEGORIES (ADMIN) =====
+export async function apiCreateCategory(name: string): Promise<void> {
+  await request("/categories", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+}
+
+export async function apiUpdateCategory(
+  id: number,
+  name: string
+): Promise<void> {
+  // backend wymaga obiektu z Name (Id może być, ale nie musi)
+  await request(`/categories/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ id, name }),
+  });
+}
+
+export async function apiDeleteCategory(id: number): Promise<void> {
+  await request(`/categories/${id}`, {
+    method: "DELETE",
+  });
+}

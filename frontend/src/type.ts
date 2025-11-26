@@ -60,3 +60,43 @@ export type AuthContextType = {
   login: (token: string) => void;
   logout: () => void;
 };
+
+export type ReviewSummary = {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+};
+
+export type LogItem = {
+  id: number;
+  userId: number | null;
+  action: string;
+  details: string | null;
+  timestamp: string;
+};
+
+export type ReportsSummary = {
+  users: number;
+  products: number;
+  categories: number;
+  reviews: ReviewSummary;
+  lastLogs: LogItem[];
+};
+
+export type Category = {
+  id: number;
+  name: string;
+};
+
+export type CreateProductDto = {
+  name: string;
+  brand: string;
+  categoryId: number;
+};
+
+export type RegisterRequest = {
+  email: string;
+  password: string;
+  confirmPassword: string;
+};

@@ -9,6 +9,8 @@ import * as auth from "./auth";
 import "./App.css";
 import {AdminProductsPage} from "./components/AdminProductsPage";
 import AdminCategoriesPage from "./components/AdminCategoriesPage";
+import RegisterPage from "./components/RegisterPage";
+
 
 
 
@@ -29,12 +31,16 @@ const App: React.FC = () => {
     </>
   )}
   {isAuthenticated ? (
-    <button onClick={logout} className="logout-btn">
-      Wyloguj
-    </button>
-  ) : (
+  <button onClick={logout} className="logout-btn">
+    Wyloguj
+  </button>
+) : (
+  <>
     <Link to="/login">Zaloguj</Link>
-  )}
+    {" | "}
+    <Link to="/register">Rejestracja</Link>
+  </>
+)}
 </nav>
       </header>
 
@@ -42,9 +48,10 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/products" replace />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
-
+          
           {/* Ochrona trasy admina bez dodatkowego komponentu */}
           <Route
             path="/admin"
