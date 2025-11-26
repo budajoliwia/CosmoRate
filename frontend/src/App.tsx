@@ -8,6 +8,8 @@ import AdminDashboardPage from "./components/AdminDashboardPage";
 import * as auth from "./auth";
 import "./App.css";
 import {AdminProductsPage} from "./components/AdminProductsPage";
+import AdminCategoriesPage from "./components/AdminCategoriesPage";
+
 
 
 const App: React.FC = () => {
@@ -23,6 +25,7 @@ const App: React.FC = () => {
     <>
       <Link to="/admin">Panel admina</Link>
       <Link to="/admin/products">Produkty (admin)</Link>
+      <Link to="/admin/categories">Kategorie (admin)</Link>
     </>
   )}
   {isAuthenticated ? (
@@ -67,6 +70,20 @@ const App: React.FC = () => {
               )
             }
           />
+          <Route
+            path="/admin/categories"
+            element={
+              isAdmin ? (
+                <AdminCategoriesPage />
+              ) : isAuthenticated ? (
+                <Navigate to="/products" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
+          
 
           <Route path="*" element={<Navigate to="/products" replace />} />
         </Routes>
