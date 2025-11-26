@@ -11,6 +11,8 @@ import {AdminProductsPage} from "./components/AdminProductsPage";
 import AdminCategoriesPage from "./components/AdminCategoriesPage";
 import RegisterPage from "./components/RegisterPage";
 import MyReviewsPage from "./components/MyReviewsPage";
+import AdminReviewsPage from "./components/AdminReviewsPage";
+
 
 
 
@@ -30,6 +32,7 @@ const App: React.FC = () => {
       <Link to="/admin">Panel admina</Link>
       <Link to="/admin/products">Produkty (admin)</Link>
       <Link to="/admin/categories">Kategorie (admin)</Link>
+       <Link to="/admin/reviews">Recenzje (admin)</Link>
     </>
   )}
   {isAuthenticated ? (
@@ -105,6 +108,19 @@ const App: React.FC = () => {
               )
             }
           />
+          <Route
+            path="/admin/reviews"
+            element={
+              isAdmin ? (
+                <AdminReviewsPage />
+              ) : isAuthenticated ? (
+                <Navigate to="/products" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
 
           
 

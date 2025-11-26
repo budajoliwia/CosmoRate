@@ -8,7 +8,9 @@ import type {
   ReportsSummary,
   Category,
   CreateProductDto,
-  RegisterRequest
+  RegisterRequest,
+  MyReviewItem,
+  PendingReviewItem,
 } from "./type";
 
 const BASE_URL = "https://localhost:7080/api"; // backend
@@ -54,6 +56,7 @@ export async function apiLogin(data: LoginRequest): Promise<LoginResponse> {
     body: JSON.stringify(data),
   });
 }
+
 export async function apiRegister(data: RegisterRequest): Promise<void> {
   await request("/auth/register", {
     method: "POST",
@@ -61,7 +64,7 @@ export async function apiRegister(data: RegisterRequest): Promise<void> {
   });
 }
 
-// ===== PRODUCTS =====
+// ===== PRODUCTS (PUBLIC) =====
 export async function apiGetProducts(): Promise<ProductListItem[]> {
   return request<ProductListItem[]>("/products");
 }
@@ -70,15 +73,11 @@ export async function apiGetProduct(id: number): Promise<ProductDetails> {
   return request<ProductDetails>(`/products/${id}`);
 }
 
-// ===== REVIEWS =====
+// ===== REVIEWS (PUBLIC + USER) =====
 export async function apiGetReviewsForProduct(
   productId: number
 ): Promise<ReviewItem[]> {
   return request<ReviewItem[]>(`/reviews/product/${productId}`);
-}
-
-export async function apiGetReportsSummary(): Promise<ReportsSummary> {
-  return request<ReportsSummary>("/reports/summary");
 }
 
 export async function apiCreateReview(dto: CreateReviewDto): Promise<void> {
@@ -88,34 +87,38 @@ export async function apiCreateReview(dto: CreateReviewDto): Promise<void> {
   });
 }
 
+// ===== REPORTS (ADMIN) =====
+export async function apiGetReportsSummary(): Promise<ReportsSummary> {
+  return request<ReportsSummary>("/reports/summary");
+}
+
+// ===== MY REVIEWS (USER) =====
+export async function apiGetMyReviews(): Promise<MyReviewItem[]> {
+  return request<MyReviewItem[]>("/reviews/my");
+}
+
+// ===== REVIEWS MODERATION (ADMIN) =====
+export async function apiGetPendingReviews(): Promise<PendingReviewItem[]> {
+  return request<PendingReviewItem[]>("/reviews/pending");
+}
+
+export async function apiApproveReview(id: number): Promise<void> {
+  await request(`/reviews/${id}/approve`, {
+    method: "PUT",
+  });
+}
+
+export async function apiRejectReview(id: number): Promise<void> {
+  await request(`/reviews/${id}/reject`, {
+    method: "PUT",
+  });
+}
+
 // ===== CATEGORIES (ADMIN) =====
 export async function apiGetCategories(): Promise<Category[]> {
-    return request<Category[]>("/categories");
-}
-// ===== PRODUCTS (ADMIN) =====
-export async function apiCreateProduct(dto: CreateProductDto):Promise<void> {
-    await request("/products",{
-        method:"POST",
-        body:JSON.stringify(dto),
-    });
+  return request<Category[]>("/categories");
 }
 
-export async function apiUpdateProduct(
-    id:number,
-    dto:CreateProductDto): Promise<void>{
-        await request(`/products/${id}`,{
-            method:"PUT",
-            body:JSON.stringify(dto),
-        });
-    }
-
-    export async function apiDeleteProduct(id:number):Promise<void>{
-        await request(`/products/${id}`,{
-            method:"DELETE",
-        });
-
-    }
-// ===== CATEGORIES (ADMIN) =====
 export async function apiCreateCategory(name: string): Promise<void> {
   await request("/categories", {
     method: "POST",
@@ -136,6 +139,32 @@ export async function apiUpdateCategory(
 
 export async function apiDeleteCategory(id: number): Promise<void> {
   await request(`/categories/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// ===== PRODUCTS (ADMIN) =====
+export async function apiCreateProduct(
+  dto: CreateProductDto
+): Promise<void> {
+  await request("/products", {
+    method: "POST",
+    body: JSON.stringify(dto),
+  });
+}
+
+export async function apiUpdateProduct(
+  id: number,
+  dto: CreateProductDto
+): Promise<void> {
+  await request(`/products/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(dto),
+  });
+}
+
+export async function apiDeleteProduct(id: number): Promise<void> {
+  await request(`/products/${id}`, {
     method: "DELETE",
   });
 }
