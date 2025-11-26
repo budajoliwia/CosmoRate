@@ -10,6 +10,8 @@ import "./App.css";
 import {AdminProductsPage} from "./components/AdminProductsPage";
 import AdminCategoriesPage from "./components/AdminCategoriesPage";
 import RegisterPage from "./components/RegisterPage";
+import MyReviewsPage from "./components/MyReviewsPage";
+
 
 
 
@@ -31,9 +33,13 @@ const App: React.FC = () => {
     </>
   )}
   {isAuthenticated ? (
-  <button onClick={logout} className="logout-btn">
-    Wyloguj
-  </button>
+   <>
+    <Link to="/my/reviews">Moje recenzje</Link>
+    {" | "}
+    <button onClick={logout} className="logout-btn">
+      Wyloguj
+    </button>
+  </>
 ) : (
   <>
     <Link to="/login">Zaloguj</Link>
@@ -84,6 +90,16 @@ const App: React.FC = () => {
                 <AdminCategoriesPage />
               ) : isAuthenticated ? (
                 <Navigate to="/products" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/my/reviews"
+            element={
+              isAuthenticated ? (
+                <MyReviewsPage />
               ) : (
                 <Navigate to="/login" replace />
               )
