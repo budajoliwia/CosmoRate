@@ -137,4 +137,38 @@ public class ReviewsController : ControllerBase
 
         return NoContent();
     }
+
+    // GET /api/Reviews/my  -> recenzje zalogowanego użytkownika
+    [Authorize]
+    [HttpGet("my")]
+    public async Task<IActionResult> GetMyReviews()
+    {
+        var userIdClaim =
+            User.FindFirst("sub") ??
+            User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (userIdClaim == null)
+            return Unauthorized("User id is not found in token.");
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        var items = await _db.Reviews
+            .Include(r => r.Product)
+            .Where(r => r.UserId == userId)
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new
+            {
+                r.Id,
+                r.ProductId,
+                ProductName = r.Product != null ? r.Product.Name : null,
+                r.Rating,
+                r.Title,
+                r.Body,
+                r.Status,
+                r.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(items);
+    }
 }
