@@ -137,6 +137,31 @@ public class ReviewsController : ControllerBase
 
         return NoContent();
     }
+    // GET /api/Reviews/pending  -> recenzje w statusie Pending (dla admina)
+    [Authorize(Roles = "Admin")]
+    [HttpGet("pending")]
+    public async Task<IActionResult> GetPending()
+    {
+        var items = await _db.Reviews
+            .Where(r => r.Status == "Pending")
+            .OrderBy(r => r.CreatedAt)
+            .Select(r => new
+            {
+                r.Id,
+                r.ProductId,
+                r.UserId,
+                r.Rating,
+                r.Title,
+                r.Body,
+                r.Status,
+                r.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(items);
+    }
+
+
 
     // GET /api/Reviews/my  -> recenzje zalogowanego użytkownika
     [Authorize]
