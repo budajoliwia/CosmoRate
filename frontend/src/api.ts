@@ -96,6 +96,11 @@ export async function apiGetReportsSummary(): Promise<ReportsSummary> {
 export async function apiGetMyReviews(): Promise<MyReviewItem[]> {
   return request<MyReviewItem[]>("/reviews/my");
 }
+export async function apiDeleteMyReview(id: number): Promise<void> {
+  await request(`/reviews/${id}`, {
+    method: "DELETE",
+  });
+}
 
 // ===== REVIEWS MODERATION (ADMIN) =====
 export async function apiGetPendingReviews(): Promise<PendingReviewItem[]> {
@@ -113,6 +118,10 @@ export async function apiRejectReview(id: number): Promise<void> {
     method: "PUT",
   });
 }
+
+
+
+
 
 // ===== CATEGORIES (ADMIN) =====
 export async function apiGetCategories(): Promise<Category[]> {

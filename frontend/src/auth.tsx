@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useEffect, useState, type ReactElement } from "react";
-import type { AuthContextType, AuthUser, DecodedToken } from "./type";
+// src/auth.tsx
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+ type ReactElement,
+} from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import type { AuthContextType, AuthUser, DecodedToken } from "./type";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -16,7 +23,9 @@ function decodeToken(token: string): AuthUser {
 
     const roleClaim =
       payload.role ??
-      payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      payload[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+      ];
 
     let role: string | null = null;
     if (Array.isArray(roleClaim)) {
@@ -28,7 +37,9 @@ function decodeToken(token: string): AuthUser {
     const userIdStr =
       payload.sub ??
       payload.nameid ??
-      payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+      payload[
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+      ];
 
     const userId = userIdStr ? parseInt(userIdStr, 10) : null;
 
@@ -43,7 +54,9 @@ function decodeToken(token: string): AuthUser {
   }
 }
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<AuthUser>({
     userId: null,
     role: null,
@@ -86,8 +99,10 @@ export function useAuth(): AuthContextType {
   return ctx;
 }
 
-// Komponent do ochrony tras
-export const RequireAuth: React.FC<{ children: ReactElement }> = ({ children }) => {
+// trasa wymagająca zalogowania (zwykły użytkownik)
+export const RequireAuth: React.FC<{ children: ReactElement }> = ({
+  children,
+}) => {
   const auth = useAuth();
   const location = useLocation();
 
@@ -97,3 +112,46 @@ export const RequireAuth: React.FC<{ children: ReactElement }> = ({ children }) 
 
   return children;
 };
+
+
+// trasa tylko dla ADMINA
+export const RequireAdmin: React.FC<{ children: ReactElement }> = ({
+  children,
+}) => {
+  const auth = useAuth();
+  const location = useLocation();
+
+  if (!auth.isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (!auth.isAdmin) {
+    return <Navigate to="/products" replace />;
+  }
+
+  return children;
+};
+
+export function getUsernameFromToken(token: string | null): string | null {
+  if (!token) return null;
+
+  try {
+    const [, payloadBase64] = token.split(".");
+    if (!payloadBase64) return null;
+
+    const json = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
+    const payload = JSON.parse(json) as any;
+
+    // próbujemy różne typowe nazwy claimów
+    return (
+      payload.username ||
+      payload.unique_name ||
+      payload.email ||
+      null
+    );
+  } catch (e){
+    console.error("Username decode failed.");
+    return null;
+  }
+}
+
