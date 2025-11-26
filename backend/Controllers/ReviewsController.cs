@@ -160,6 +160,37 @@ public class ReviewsController : ControllerBase
 
         return Ok(items);
     }
+    // DELETE /api/reviews/10  -> usuń własną recenzję w statusie Pending
+    [Authorize]
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteMyReview(int id)
+    {
+        var userIdClaim =
+            User.FindFirst("sub") ??
+            User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (userIdClaim == null)
+            return Unauthorized("User id is not found in token.");
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        var review = await _db.Reviews
+            .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+
+        if (review == null)
+            return NotFound("Review not found.");
+
+        if (review.Status != "Pending")
+            return BadRequest("Można usunąć tylko recenzje w statusie Pending.");
+
+        _db.Reviews.Remove(review);
+        await _db.SaveChangesAsync();
+
+        await _logger.LogAsync(userId, "DeleteReview", $"ReviewId={id}");
+
+        return NoContent();
+    }
+
 
 
 
