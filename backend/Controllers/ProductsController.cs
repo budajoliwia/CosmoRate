@@ -43,7 +43,8 @@ public class ProductsController : ControllerBase
                 p.Id,
                 p.Name,
                 p.Brand,
-                Category = p.Category != null ? p.Category.Name : null
+                Category = p.Category != null ? p.Category.Name : null,
+                p.ImageUrl
             })
             .ToListAsync();
 
@@ -64,7 +65,8 @@ public class ProductsController : ControllerBase
                 x.Name,
                 x.Brand,
                 CategoryId = x.CategoryId,
-                Category = x.Category != null ? x.Category.Name : null
+                Category = x.Category != null ? x.Category.Name : null,
+                x.ImageUrl
             })
             .FirstOrDefaultAsync();
 
@@ -84,13 +86,14 @@ public class ProductsController : ControllerBase
         // kategoria musi istnieć
         var categoryExists = await _db.Categories.AnyAsync(c => c.Id == dto.CategoryId);
         if (!categoryExists) return BadRequest("Invalid categoryId – category does not exist.");
-
+        
         // mapowanie DTO -> encja
         var p = new Product
         {
             Name = dto.Name,
             Brand = dto.Brand,
-            CategoryId = dto.CategoryId
+            CategoryId = dto.CategoryId,
+            ImageUrl=dto.ImageUrl,
         };
 
         _db.Products.Add(p);
@@ -126,6 +129,7 @@ public class ProductsController : ControllerBase
         product.Name = dto.Name;
         product.Brand = dto.Brand;
         product.CategoryId = dto.CategoryId;
+        product.ImageUrl=dto.ImageUrl;
 
         await _db.SaveChangesAsync();
 
