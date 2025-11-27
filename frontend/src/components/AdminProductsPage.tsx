@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import * as api from "../api";
 import type { ProductListItem, Category, CreateProductDto } from "../type";
 
-// <-- TU: eksport od razu jako named
-export const AdminProductsPage: React.FC = () => {
+const AdminProductsPage: React.FC = () => {
   const [products, setProducts] = useState<ProductListItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -15,6 +14,7 @@ export const AdminProductsPage: React.FC = () => {
     name: "",
     brand: "",
     categoryId: 0,
+    imageUrl: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -45,6 +45,7 @@ export const AdminProductsPage: React.FC = () => {
       name: "",
       brand: "",
       categoryId: categories[0]?.id ?? 0,
+      imageUrl: "",
     });
   };
 
@@ -57,6 +58,7 @@ export const AdminProductsPage: React.FC = () => {
         name: p.name,
         brand: p.brand,
         categoryId: p.categoryId ?? 0,
+        imageUrl: p.imageUrl ?? "",
       });
     } catch (err: any) {
       setError(err.message || "Nie udało się pobrać produktu");
@@ -114,6 +116,7 @@ export const AdminProductsPage: React.FC = () => {
             <th>Nazwa</th>
             <th>Marka</th>
             <th>Kategoria</th>
+            <th>Zdjęcie</th>
             <th>Akcje</th>
           </tr>
         </thead>
@@ -125,6 +128,17 @@ export const AdminProductsPage: React.FC = () => {
               <td>{p.brand}</td>
               <td>{p.category ?? "-"}</td>
               <td>
+                {p.imageUrl ? (
+                  <img
+                    src={p.imageUrl}
+                    alt={p.name}
+                    style={{ width: 60, height: 60, objectFit: "cover" }}
+                  />
+                ) : (
+                  "Brak"
+                )}
+              </td>
+              <td>
                 <button onClick={() => void handleEdit(p.id)}>Edytuj</button>{" "}
                 <button onClick={() => void handleDelete(p.id)}>Usuń</button>
               </td>
@@ -132,7 +146,7 @@ export const AdminProductsPage: React.FC = () => {
           ))}
           {products.length === 0 && (
             <tr>
-              <td colSpan={5}>Brak produktów.</td>
+              <td colSpan={6}>Brak produktów.</td>
             </tr>
           )}
         </tbody>
@@ -186,6 +200,18 @@ export const AdminProductsPage: React.FC = () => {
             </select>
           </label>
 
+          <label>
+            URL zdjęcia
+            <input
+              type="text"
+              value={form.imageUrl ?? ""}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, imageUrl: e.target.value }))
+              }
+              placeholder="https://example.com/obrazek.jpg"
+            />
+          </label>
+
           <div className="form-actions">
             <button type="submit" disabled={saving}>
               {saving
@@ -205,3 +231,6 @@ export const AdminProductsPage: React.FC = () => {
     </div>
   );
 };
+
+export default AdminProductsPage;
+export { AdminProductsPage };

@@ -1,88 +1,98 @@
-
-import React, { useEffect, useMemo, useState } from "react";
+// src/components/ProductDetailsPage.tsx
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { apiCreateReview, apiGetProduct, apiGetReviewsForProduct } from "../api";
-import type { ProductDetails, ReviewItem } from "../type";
+import * as api from "../api";
+import type { ProductDetails, ReviewItem, CreateReviewDto } from "../type";
 import { useAuth } from "../auth";
 
 const ProductDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const productId = Number(id);
+  const { isAuthenticated } = useAuth();
 
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // pola formularza dodawania opinii
   const [rating, setRating] = useState(5);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitLoading, setSubmitLoading] = useState(false);
-
-  const auth = useAuth();
+  const [savingReview, setSavingReview] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const load = async () => {
-      if (!productId) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const [p, r] = await Promise.all([
-          apiGetProduct(productId),
-          apiGetReviewsForProduct(productId),
-        ]);
-        setProduct(p);
-        setReviews(r);
-      } catch (err: any) {
-        setError(err.message || "Błąd podczas ładowania danych");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!productId) return;
+    setLoading(true);
+    setError(null);
 
-    load();
+    Promise.all([
+      api.apiGetProduct(productId),
+      api.apiGetReviewsForProduct(productId),
+    ])
+      .then(([p, revs]) => {
+        setProduct(p);
+        setReviews(revs);
+      })
+      .catch((err: any) =>
+        setError(err.message || "Nie udało się pobrać danych produktu")
+      )
+      .finally(() => setLoading(false));
   }, [productId]);
 
-  const averageRating = useMemo(() => {
-    if (!reviews.length) return null;
-    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-    return sum / reviews.length;
-  }, [reviews]);
-
-  const handleSubmitReview = async (e: React.FormEvent) => {
+  const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productId) return;
-    setSubmitError(null);
-    setSubmitLoading(true);
+
+    setSavingReview(true);
+    setReviewMessage(null);
+
+    const dto: CreateReviewDto = {
+      productId,
+      rating,
+      title,
+      body,
+    };
 
     try {
-      await apiCreateReview({
-        productId,
-        rating,
-        title,
-        body,
-      });
-
-      // recenzja jest Pending, więc nie zobaczymy jej w liście dopóki admin nie zatwierdzi
+      await api.apiCreateReview(dto);
+      setReviewMessage(
+        "Twoja recenzja została zapisana i czeka na akceptację administratora."
+      );
+      setRating(5);
       setTitle("");
       setBody("");
-      setRating(5);
-      alert("Recenzja została wysłana do akceptacji admina.");
+      // odświeżamy listę tylko Approved – nowej recenzji i tak nie będzie w tym widoku,
+      // bo backend zwraca tylko zatwierdzone
+      const approved = await api.apiGetReviewsForProduct(productId);
+      setReviews(approved);
     } catch (err: any) {
-      setSubmitError(err.message || "Nie udało się dodać recenzji");
+      setReviewMessage(err.message || "Nie udało się dodać recenzji.");
     } finally {
-      setSubmitLoading(false);
+      setSavingReview(false);
     }
   };
 
-  if (loading) return <div>Ładowanie...</div>;
-  if (error) return <div className="error">{error}</div>;
-  if (!product) return <div>Nie znaleziono produktu</div>;
+  if (loading) return <p>Ładowanie...</p>;
+  if (error) return <p className="error">{error}</p>;
+  if (!product) return <p>Produkt nie został znaleziony.</p>;
 
   return (
     <div className="product-details-page">
       <h2>{product.name}</h2>
+
+      {/* ZDJĘCIE PRODUKTU */}
+      {product.imageUrl && (
+        <div style={{ marginBottom: "1rem" }}>
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            style={{ maxWidth: "250px", borderRadius: "4px" }}
+          />
+        </div>
+      )}
+
       <p>
         <strong>Marka:</strong> {product.brand}
       </p>
@@ -90,81 +100,78 @@ const ProductDetailsPage: React.FC = () => {
         <strong>Kategoria:</strong> {product.category ?? "-"}
       </p>
 
-      <section className="reviews-section">
-        <h3>Recenzje</h3>
-        {averageRating !== null && (
-          <p>
-            Średnia ocena: <strong>{averageRating.toFixed(2)}</strong> / 5 ({reviews.length}{" "}
-            opinii)
-          </p>
-        )}
-        {reviews.length === 0 && <p>Brak zatwierdzonych recenzji dla tego produktu.</p>}
+      <hr />
 
-        <ul className="reviews-list">
+      <h3>Recenzje</h3>
+      {reviews.length === 0 && <p>Brak zatwierdzonych recenzji dla tego produktu.</p>}
+      {reviews.length > 0 && (
+        <ul>
           {reviews.map((r) => (
-            <li key={r.id} className="review-item">
-              <div className="review-header">
-                <span className="review-rating">Ocena: {r.rating}/5</span>
-                <span className="review-date">
-                  {new Date(r.createdAt).toLocaleString()}
-                </span>
-              </div>
-              <h4>{r.title}</h4>
-              <p>{r.body}</p>
+            <li key={r.id} style={{ marginBottom: "0.75rem" }}>
+              <strong>{r.rating}/5</strong> – {r.title}
+              <br />
+              <span>{r.body}</span>
+              <br />
+              <small>{new Date(r.createdAt).toLocaleDateString()}</small>
             </li>
           ))}
         </ul>
-      </section>
+      )}
 
-      <section className="add-review-section">
-        <h3>Dodaj recenzję</h3>
-        {!auth.isAuthenticated ? (
-          <p>Aby dodać recenzję, musisz się zalogować.</p>
-        ) : (
-          <form onSubmit={handleSubmitReview} className="form">
-            <label>
-              Ocena (1–5)
-              <select
-                value={rating}
-                onChange={(e) => setRating(Number(e.target.value))}
-              >
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </label>
+      <hr />
 
-            <label>
-              Tytuł
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </label>
+      {/* Formularz dodawania opinii – tylko dla zalogowanego */}
+      <h3>Dodaj swoją opinię</h3>
+      {!isAuthenticated && (
+        <p>Aby dodać recenzję, musisz być zalogowana/zalogowany.</p>
+      )}
 
-            <label>
-              Treść recenzji
-              <textarea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                required
-              />
-            </label>
+      {isAuthenticated && (
+        <form onSubmit={handleAddReview} className="form">
+          <label>
+            Ocena (1–5)
+            <select
+              value={rating}
+              onChange={(e) => setRating(Number(e.target.value))}
+            >
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
 
-            {submitError && <div className="error">{submitError}</div>}
+          <label>
+            Tytuł
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </label>
 
-            <button type="submit" disabled={submitLoading}>
-              {submitLoading ? "Wysyłanie..." : "Wyślij recenzję"}
-            </button>
-          </form>
-        )}
-      </section>
+          <label>
+            Treść recenzji
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              required
+              rows={4}
+            />
+          </label>
+
+          {reviewMessage && <p>{reviewMessage}</p>}
+
+          <button type="submit" disabled={savingReview}>
+            {savingReview ? "Zapisywanie..." : "Wyślij recenzję"}
+          </button>
+        </form>
+      )}
     </div>
   );
 };
 
 export default ProductDetailsPage;
+export { ProductDetailsPage };

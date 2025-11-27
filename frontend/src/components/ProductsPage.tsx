@@ -1,36 +1,30 @@
-
+// src/components/ProductsPage.tsx
 import React, { useEffect, useState } from "react";
-import { apiGetProducts } from "../api";
-import type { ProductListItem } from "../type";
 import { useNavigate } from "react-router-dom";
+import * as api from "../api";
+import type { ProductListItem } from "../type";
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<ProductListItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-
+  const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await apiGetProducts();
-        setProducts(data);
-      } catch (err: any) {
-        setError(err.message || "Błąd podczas pobierania produktów");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    setLoading(true);
+    setError(null);
+    api
+      .apiGetProducts()
+      .then(setProducts)
+      .catch((err: any) =>
+        setError(err.message || "Nie udało się pobrać produktów")
+      )
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = products.filter((p) => {
-    const q = search.toLowerCase();
+    const q = query.toLowerCase();
     return (
       p.name.toLowerCase().includes(q) ||
       p.brand.toLowerCase().includes(q) ||
@@ -38,54 +32,65 @@ const ProductsPage: React.FC = () => {
     );
   });
 
+  if (loading) return <p>Ładowanie produktów...</p>;
+  if (error) return <p className="error">{error}</p>;
+
   return (
-    <div className="products-page">
+    <div>
       <h2>Wyszukiwarka produktów</h2>
 
       <input
         type="text"
-        placeholder="Szukaj po nazwie, marce lub kategorii..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="search-input"
+        placeholder="Szukaj po nazwie, marce lub kategorii"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        style={{ marginBottom: "1rem", width: "60%" }}
       />
 
-      {loading && <div>Ładowanie...</div>}
-      {error && <div className="error">{error}</div>}
-
-      {!loading && !error && (
-        <table className="products-table">
-          <thead>
-            <tr>
-              <th>Nazwa</th>
-              <th>Marka</th>
-              <th>Kategoria</th>
-              <th></th>
+      <table className="products-table">
+        <thead>
+          <tr>
+            <th>Zdjęcie</th>
+            <th>Nazwa</th>
+            <th>Marka</th>
+            <th>Kategoria</th>
+            <th>Akcje</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map((p) => (
+            <tr key={p.id}>
+              <td>
+                {p.imageUrl ? (
+                  <img
+                    src={p.imageUrl}
+                    alt={p.name}
+                    style={{ width: 60, height: 60, objectFit: "cover" }}
+                  />
+                ) : (
+                  "Brak"
+                )}
+              </td>
+              <td>{p.name}</td>
+              <td>{p.brand}</td>
+              <td>{p.category ?? "-"}</td>
+              <td>
+                <button onClick={() => navigate(`/products/${p.id}`)}>
+                  Szczegóły i recenzje
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {filtered.map((p) => (
-              <tr key={p.id}>
-                <td>{p.name}</td>
-                <td>{p.brand}</td>
-                <td>{p.category ?? "-"}</td>
-                <td>
-                  <button onClick={() => navigate(`/products/${p.id}`)}>
-                    Szczegóły i recenzje
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={4}>Brak produktów spełniających kryteria.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      )}
+          ))}
+          {filtered.length === 0 && (
+            <tr>
+              <td colSpan={5}>Brak produktów spełniających kryteria.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };
 
 export default ProductsPage;
+export { ProductsPage };

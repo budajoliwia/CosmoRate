@@ -4,6 +4,7 @@ export type ProductListItem={
     name: string;
     brand: string;
     category: string | null;
+    imageUrl?:string | null;
 };
 
 export type ProductDetails = {
@@ -12,6 +13,7 @@ export type ProductDetails = {
   brand: string;
   categoryId: number | null;
   category: string | null;
+  imageUrl?: string | null; 
 };
 
 export type ReviewItem = {
@@ -76,6 +78,13 @@ export type LogItem = {
   timestamp: string;
 };
 
+export type RegisterRequest = {
+  email: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+};
+
 export type ReportsSummary = {
   users: number;
   products: number;
@@ -93,10 +102,29 @@ export type CreateProductDto = {
   name: string;
   brand: string;
   categoryId: number;
+  imageUrl?: string; 
 };
 
-export type RegisterRequest = {
-  email: string;
-  password: string;
-  confirmPassword: string;
+export type MyReviewItem = {
+  id: number;
+  productId: number;
+  productName: string | null;
+  rating: number;
+  title: string;
+  body: string;
+  status: string;
+  createdAt: string;
 };
+export type PendingReviewItem = {
+  id: number;
+  productId: number;
+  userId: number | null;
+  rating: number;
+  title: string;
+  body: string;
+  status: string;
+  createdAt: string;
+};
+
+
+
