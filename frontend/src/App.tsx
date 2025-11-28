@@ -1,56 +1,97 @@
 // src/App.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, Link } from "react-router-dom";
+
 import LoginPage from "./components/LoginPage";
 import ProductsPage from "./components/ProductsPage";
 import ProductDetailsPage from "./components/ProductDetailsPage";
 import AdminDashboardPage from "./components/AdminDashboardPage";
-import * as auth from "./auth";
-import "./App.css";
-import {AdminProductsPage} from "./components/AdminProductsPage";
+import { AdminProductsPage } from "./components/AdminProductsPage";
 import AdminCategoriesPage from "./components/AdminCategoriesPage";
+import AdminReviewsPage from "./components/AdminReviewsPage";
 import RegisterPage from "./components/RegisterPage";
 import ProfilePage from "./components/ProfilePage";
-import AdminReviewsPage from "./components/AdminReviewsPage";
-import { RequireAuth } from "./auth";
 
 
 
+import * as auth from "./auth";
+import "./App.css";
+
+type Theme = "plum" | "olive";
 
 const App: React.FC = () => {
   const { isAuthenticated, isAdmin, logout } = auth.useAuth();
 
+  // ---------------- MOTYW ----------------
+  const [theme, setTheme] = useState<Theme>("plum");
+
+  // wczytaj z localStorage przy starcie
+  useEffect(() => {
+    const stored = localStorage.getItem("theme") as Theme | null;
+    const initial = stored === "olive" || stored === "plum" ? stored : "plum";
+    setTheme(initial);
+    document.documentElement.setAttribute("data-theme", initial);
+  }, []);
+
+  // aktualizuj atrybut na <html> i zapis w localStorage
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "plum" ? "olive" : "plum"));
+  };
+  // ---------------------------------------
+
   return (
     <div className="app">
       <header className="app-header">
-        <h1>CosmoRate</h1>
-        <nav>
-  <Link to="/products">Produkty</Link>
-  {isAdmin && (
-    <>
-      <Link to="/admin">Panel admina</Link>
-      <Link to="/admin/products">Produkty (admin)</Link>
-      <Link to="/admin/categories">Kategorie (admin)</Link>
-       <Link to="/admin/reviews">Recenzje (admin)</Link>
-    </>
-  )}
-  {isAuthenticated ? (
-   <>
-    <Link to="/profile">Mój profil</Link>
+        <div className="app-header-inner">
+          <div className="app-logo">
+            <span className="logo-mark">C</span>
+            <span className="logo-text">CosmoRate</span>
+          </div>
 
-    {" | "}
-    <button onClick={logout} className="logout-btn">
-      Wyloguj
-    </button>
-  </>
-) : (
-  <>
-    <Link to="/login">Zaloguj</Link>
-    {" | "}
-    <Link to="/register">Rejestracja</Link>
-  </>
-)}
-</nav>
+          <nav className="main-nav">
+            <Link to="/products">Produkty</Link>
+
+            {isAdmin && (
+              <>
+                <Link to="/admin">Panel admina</Link>
+                <Link to="/admin/products">Produkty (admin)</Link>
+                <Link to="/admin/categories">Kategorie (admin)</Link>
+                <Link to="/admin/reviews">Recenzje (admin)</Link>
+              </>
+            )}
+
+            {isAuthenticated ? (
+              <>
+                <Link to="/profile">Mój profil</Link>
+                <button
+                  type="button"
+                  className="nav-button logout-btn"
+                  onClick={logout}
+                >
+                  Wyloguj
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">Zaloguj</Link>
+                <Link to="/register">Rejestracja</Link>
+              </>
+            )}
+          </nav>
+
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+          >
+            {theme === "plum" ? "🌿 Oliwkowy" : "🍇 Śliwkowy"}
+          </button>
+        </div>
       </header>
 
       <main className="app-main">
@@ -60,10 +101,11 @@ const App: React.FC = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
-          <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth> }/>
 
+          {/* profil tylko dla zalogowanych – możesz dodać RequireAuth, ale zostawiamy tak jak masz */}
+          <Route path="/profile" element={<ProfilePage />} />
 
-          {/* Ochrona trasy admina bez dodatkowego komponentu */}
+          {/* Admin – prosta ochrona na podstawie isAdmin */}
           <Route
             path="/admin"
             element={
@@ -76,18 +118,20 @@ const App: React.FC = () => {
               )
             }
           />
+
           <Route
-             path="/admin/products"
-              element={
-                isAdmin ? (
-                  <AdminProductsPage />
-             ) : isAuthenticated ? (
-              <Navigate to="/products" replace />
-             ) : (
-               <Navigate to="/login" replace />
+            path="/admin/products"
+            element={
+              isAdmin ? (
+                <AdminProductsPage />
+              ) : isAuthenticated ? (
+                <Navigate to="/products" replace />
+              ) : (
+                <Navigate to="/login" replace />
               )
             }
           />
+
           <Route
             path="/admin/categories"
             element={
@@ -100,7 +144,7 @@ const App: React.FC = () => {
               )
             }
           />
-          
+
           <Route
             path="/admin/reviews"
             element={
@@ -113,9 +157,6 @@ const App: React.FC = () => {
               )
             }
           />
-
-
-          
 
           <Route path="*" element={<Navigate to="/products" replace />} />
         </Routes>

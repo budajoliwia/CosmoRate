@@ -12,6 +12,7 @@ const ProductDetailsPage: React.FC = () => {
 
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const averageRating= reviews.length >0 ? reviews.reduce((sum,r)=> sum+r.rating,0)/ reviews.length:null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,20 +104,31 @@ const ProductDetailsPage: React.FC = () => {
       <hr />
 
       <h3>Recenzje</h3>
-      {reviews.length === 0 && <p>Brak zatwierdzonych recenzji dla tego produktu.</p>}
-      {reviews.length > 0 && (
-        <ul>
-          {reviews.map((r) => (
-            <li key={r.id} style={{ marginBottom: "0.75rem" }}>
-              <strong>{r.rating}/5</strong> – {r.title}
-              <br />
-              <span>{r.body}</span>
-              <br />
-              <small>{new Date(r.createdAt).toLocaleDateString()}</small>
-            </li>
-          ))}
-        </ul>
-      )}
+     <section style={{ marginBottom: "1.5rem" }}>
+  {reviews.length === 0 ? (
+    <p>Brak ocen dla tego produktu.</p>
+  ) : (
+    <p>
+      <strong>Średnia ocena:</strong>{" "}
+      <strong>{averageRating?.toFixed(1)}</strong> / 5{" "}
+      <span style={{ fontSize: "0.9rem", color: "#555" }}>
+        (na podstawie {reviews.length} recenzji)
+      </span>
+    </p>
+  )}
+</section>
+<ul>
+  {reviews.map(r => (
+    <li key={r.id}>
+      <p>
+        <strong>{r.rating}/5 – {r.title}</strong>
+      </p>
+      <p>{r.body}</p>
+      <small>{new Date(r.createdAt).toLocaleDateString()}</small>
+    </li>
+  ))}
+</ul>
+
 
       <hr />
 

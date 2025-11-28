@@ -1,93 +1,84 @@
 // src/components/ProductsPage.tsx
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as api from "../api";
+import { apiGetProducts } from "../api";
 import type { ProductListItem } from "../type";
+import { useEffect } from "react";
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<ProductListItem[]>([]);
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    api
-      .apiGetProducts()
+    apiGetProducts()
       .then(setProducts)
-      .catch((err: any) =>
-        setError(err.message || "Nie udało się pobrać produktów")
-      )
+      .catch((err: any) => setError(err.message || "Błąd podczas ładowania produktów"))
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = products.filter((p) => {
-    const q = query.toLowerCase();
-    return (
-      p.name.toLowerCase().includes(q) ||
-      p.brand.toLowerCase().includes(q) ||
-      (p.category ?? "").toLowerCase().includes(q)
-    );
-  });
-
-  if (loading) return <p>Ładowanie produktów...</p>;
-  if (error) return <p className="error">{error}</p>;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter((p) => {
+      const text = `${p.name} ${p.brand} ${p.category ?? ""}`.toLowerCase();
+      return text.includes(q);
+    });
+  }, [products, query]);
 
   return (
-    <div>
+    <div className="products-page">
       <h2>Wyszukiwarka produktów</h2>
+      <p className="products-subtitle">
+        Znajdź kosmetyk po nazwie, marce lub kategorii i sprawdź opinie innych użytkowników.
+      </p>
 
-      <input
-        type="text"
-        placeholder="Szukaj po nazwie, marce lub kategorii"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{ marginBottom: "1rem", width: "60%" }}
-      />
+      {/* pasek wyszukiwania */}
+      <div className="product-search-wrapped">
+        <input
+          type="text"
+          className="product-search-input"
+          placeholder='Szukaj: np. „serum”, „The Ordinary”, „perfumy”…'
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
 
-      <table className="products-table">
-        <thead>
-          <tr>
-            <th>Zdjęcie</th>
-            <th>Nazwa</th>
-            <th>Marka</th>
-            <th>Kategoria</th>
-            <th>Akcje</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((p) => (
-            <tr key={p.id}>
-              <td>
-                {p.imageUrl ? (
-                  <img
-                    src={p.imageUrl}
-                    alt={p.name}
-                    style={{ width: 60, height: 60, objectFit: "cover" }}
-                  />
-                ) : (
-                  "Brak"
-                )}
-              </td>
-              <td>{p.name}</td>
-              <td>{p.brand}</td>
-              <td>{p.category ?? "-"}</td>
-              <td>
-                <button onClick={() => navigate(`/products/${p.id}`)}>
-                  Szczegóły i recenzje
-                </button>
-              </td>
-            </tr>
-          ))}
-          {filtered.length === 0 && (
-            <tr>
-              <td colSpan={5}>Brak produktów spełniających kryteria.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      {loading && <p>Ładowanie...</p>}
+      {error && <p className="error">{error}</p>}
+
+      {!loading && filtered.length === 0 && (
+        <p>Brak produktów spełniających kryteria wyszukiwania.</p>
+      )}
+
+      {!loading && filtered.length > 0 && (
+        <div className="products-grid">
+  {filtered.map((p) => (
+    <div className="product-card" key={p.id}>
+      <div className="product-card-image">
+        {p.imageUrl && (
+          <img src={p.imageUrl} alt={p.name} />
+        )}
+      </div>
+
+      <h3>{p.name}</h3>
+
+      <div className="product-card-meta">
+        <span>{p.brand}</span>
+        <span>{p.category ?? "Bez kategorii"}</span>
+      </div>
+
+      <button onClick={() => navigate(`/products/${p.id}`)}>
+        Szczegóły i recenzje
+      </button>
+    </div>
+  ))}
+</div>
+      )}
     </div>
   );
 };
