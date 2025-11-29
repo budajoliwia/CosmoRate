@@ -339,8 +339,10 @@ button:disabled {
   flex: 1;
   width: 100%;
   max-width: 720px;
+  margin : 30px;
   padding: 0.7rem 1rem;
   border-radius: 999px;
+  justify-content: center;
   border: 1px solid var(--color-border-soft);
   font-size: 0.9rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
@@ -484,10 +486,6 @@ tr:nth-child(odd) td {
   border: 1px solid var(--color-border-soft);
 }
 
-/* ===============================
-   DODATKOWE STYLI Z DAWNEGO index.css
-   (profil, recenzje, szczegóły produktu)
-   =============================== */
 
 .profile-header {
   margin-bottom: 1.5rem;
@@ -550,5 +548,132 @@ tr:nth-child(odd) td {
 
   .product-card-image {
     height: 200px;
+  }
+}
+/* ===============================
+   STRONA SZCZEGÓŁÓW PRODUKTU
+   =============================== */
+
+/* cała karta produktu – wyśrodkowana, bardziej „premium” */
+.product-details-page {
+  max-width: 820px;
+  margin: 1.2rem auto 2.5rem;
+  padding: 2rem 2.5rem 2.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+}
+
+/* tytuł produktu */
+.product-details-page > h2 {
+  margin-top: 0;
+  margin-bottom: 0.4rem;
+}
+
+/* meta (marka / kategoria) bliżej siebie, delikatniejszy tekst */
+.product-details-page > p {
+  margin: 0.15rem 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.product-details-page > p strong {
+  color: var(--color-text);
+}
+
+/* główne zdjęcie – zawsze wyśrodkowane i ładnie zaokrąglone */
+.product-details-page img {
+  display: block;
+  max-width: 260px;
+  width: 100%;
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+/* separator między metadanymi a recenzjami */
+.product-details-page hr {
+  width: 100%;
+  max-width: 640px;
+  margin: 1.6rem auto 1.1rem;
+  border: 0;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+/* nagłówek sekcji recenzji */
+.product-details-page h3 {
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+/* podsumowanie średniej oceny */
+.product-details-page section {
+  margin-bottom: 1.3rem;
+  font-size: 0.95rem;
+}
+
+/* lista recenzji jako eleganckie „kafelkowe” karty */
+.product-details-page ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.4rem;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* pojedyncza recenzja */
+.product-details-page li {
+  text-align: left;
+  background: var(--color-bg-card);
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--color-border-soft);
+}
+
+/* tytuł recenzji z oceną */
+.product-details-page li > p:first-of-type {
+  margin: 0 0 0.2rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.product-details-page li > p:first-of-type strong {
+  color: var(--color-header-bg);
+}
+
+/* treść recenzji */
+.product-details-page li > p:nth-of-type(2) {
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+/* data recenzji */
+.product-details-page li small {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* formularz dodawania opinii – lekko odseparowany od listy */
+.product-details-page .form {
+  margin-top: 0.8rem;
+  width: 100%;
+  max-width: 640px;
+}
+
+/* na mniejszych ekranach – trochę ciaśniej */
+@media (max-width: 768px) {
+  .product-details-page {
+    margin: 1rem 0 2rem;
+    padding: 1.4rem 1.2rem 1.8rem;
+  }
+
+  .product-details-page img {
+    max-width: 220px;
   }
 }

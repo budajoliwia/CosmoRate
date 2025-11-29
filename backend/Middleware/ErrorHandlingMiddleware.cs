@@ -1,43 +1,79 @@
 ﻿using System.Net;
 using System.Text.Json;
+using CosmoRate.Api.Exceptions;
 
-namespace CosmoRate.Api.Middleware;
-
-public class ErrorHandlingMiddleware
+namespace CosmoRate.Api.Middleware
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ErrorHandlingMiddleware> _logger;
-
-    public ErrorHandlingMiddleware(
-        RequestDelegate next,
-        ILogger<ErrorHandlingMiddleware> logger)
+    public class ErrorHandlingMiddleware
     {
-        _next = next;
-        _logger = logger;
-    }
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ErrorHandlingMiddleware> _logger;
+        private readonly IHostEnvironment _env;
 
-    public async Task Invoke(HttpContext context)
-    {
-        try
+        public ErrorHandlingMiddleware(
+            RequestDelegate next,
+            ILogger<ErrorHandlingMiddleware> logger,
+            IHostEnvironment env)
         {
-            await _next(context);
+            _next = next;
+            _logger = logger;
+            _env = env;
         }
-        catch (Exception ex)
+
+        public async Task Invoke(HttpContext context)
         {
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(context, ex);
+            }
+        }
+
+        private async Task HandleExceptionAsync(HttpContext context, Exception ex)
+        {
+           
+            var statusCode = (int)HttpStatusCode.InternalServerError;
+            var message = "Unexpected server error occurred.";
+            string? details = null;
+
+            
             _logger.LogError(ex, "Unhandled exception");
 
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            
+            switch (ex)
+            {
+                case ApiException apiEx:
+                    statusCode = apiEx.StatusCode;
+                    message = apiEx.Message;
+                    break;
+
+                case UnauthorizedAccessException:
+                    statusCode = StatusCodes.Status401Unauthorized;
+                    message = "Unauthorized.";
+                    break;
+            }
+
+            
+            if (_env.IsDevelopment())
+            {
+                details = ex.StackTrace;
+            }
+
+            context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
 
             var error = new
             {
-                status = 500,
-                message = "Unexpected server error occurred.",
-                detail = ex.Message
+                status = statusCode,
+                message,
+                details
             };
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(error));
+            var json = JsonSerializer.Serialize(error);
+            await context.Response.WriteAsync(json);
         }
     }
 }
-
