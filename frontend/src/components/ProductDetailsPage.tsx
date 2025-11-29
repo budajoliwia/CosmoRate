@@ -121,7 +121,7 @@ const ProductDetailsPage: React.FC = () => {
   {reviews.map(r => (
     <li key={r.id}>
       <p>
-        <strong>{r.rating}/5 – {r.title}</strong>
+        <strong>{r.rating}/5 - {r.title}</strong>
       </p>
       <p>{r.body}</p>
       <small>{new Date(r.createdAt).toLocaleDateString()}</small>
