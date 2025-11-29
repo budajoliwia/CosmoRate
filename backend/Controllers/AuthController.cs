@@ -2,6 +2,8 @@ using CosmoRate.Api.DTOs;
 using CosmoRate.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using CosmoRate.Api.Exceptions;
+
 
 
 namespace CosmoRate.Api.Controllers;
@@ -23,7 +25,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] AuthRegisterDto dto)
     {
         var (ok, error, user) = await _auth.RegisterAsync(dto);
-        if (!ok) return BadRequest(error);
+        if (!ok) throw new BusinessValidationException("B³¹d.");
 
         // log – nowy u¿ytkownik
         await _logger.LogAsync(
@@ -45,7 +47,18 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] AuthLoginDto dto)
     {
         var (ok, error, token) = await _auth.LoginAsync(dto);
-        if (!ok) return Unauthorized(error);
+        if (!ok)
+        {
+            // log nieudanego logowania
+            await _logger.LogAsync(
+                userId: null,
+                action: "LoginFailed",
+                details: $"Email={dto.Email}; Error={error}"
+            );
+
+            
+            throw new UnauthorizedAccessException(error);
+        }
 
         // nieudane logowanie 
         await _logger.LogAsync(
