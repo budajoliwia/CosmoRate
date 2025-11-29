@@ -60,12 +60,7 @@ public class AuthController : ControllerBase
             throw new UnauthorizedAccessException(error);
         }
 
-        // nieudane logowanie 
-        await _logger.LogAsync(
-            userId: null,
-            action: "LoginFailed",
-            details: $"Email={dto.Email}"
-        );
+        
 
         // udane logowanie
         await _logger.LogAsync(
