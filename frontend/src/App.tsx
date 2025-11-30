@@ -11,6 +11,7 @@ import AdminCategoriesPage from "./components/AdminCategoriesPage";
 import AdminReviewsPage from "./components/AdminReviewsPage";
 import RegisterPage from "./components/RegisterPage";
 import ProfilePage from "./components/ProfilePage";
+import Logo from "./assets/LOGO_cosmorate.png";
 
 
 
@@ -49,7 +50,11 @@ const App: React.FC = () => {
       <header className="app-header">
         <div className="app-header-inner">
           <div className="app-logo">
-            <span className="logo-mark">C</span>
+            <img
+              src={Logo}
+              alt="CosmoRate logo"
+              className="app-logo-image"
+            />
             <span className="logo-text">CosmoRate</span>
           </div>
 
