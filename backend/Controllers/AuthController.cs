@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using CosmoRate.Api.Exceptions;
 
-
-
 namespace CosmoRate.Api.Controllers;
 
 [ApiController]
@@ -25,9 +23,9 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] AuthRegisterDto dto)
     {
         var (ok, error, user) = await _auth.RegisterAsync(dto);
-        if (!ok) throw new BusinessValidationException("B³¹d.");
+        if (!ok) throw new BusinessValidationException(error ?? "BÅ‚Ä…d rejestracji.");
 
-        // log – nowy u¿ytkownik
+        // log - nowy uÅ¼ytkownik
         await _logger.LogAsync(
             userId: user!.Id,
             action: "Register",
@@ -55,12 +53,9 @@ public class AuthController : ControllerBase
                 action: "LoginFailed",
                 details: $"Email={dto.Email}; Error={error}"
             );
-
             
             throw new UnauthorizedAccessException(error);
         }
-
-        
 
         // udane logowanie
         await _logger.LogAsync(

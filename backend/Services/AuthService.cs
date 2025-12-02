@@ -36,7 +36,8 @@ public class AuthService : IAuthService
         var user = new User
         {
             Email = dto.Email,
-            PasswordHash = dto.Password, // na później zrobimy hash
+            Username = dto.Username,
+            PasswordHash = dto.Password, 
             Role = "User"
         };
 

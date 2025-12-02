@@ -38,7 +38,17 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || `Request failed with status ${res.status}`);
+    let errorMessage = text;
+
+    try {
+      const json = JSON.parse(text);
+      if (json && json.message) {
+        errorMessage = json.message;
+      }
+    } catch {
+      // ignore parsing error
+    }
+    throw new Error(errorMessage || `Request failed with status ${res.status}`);
   }
 
   if (res.status === 204) {
