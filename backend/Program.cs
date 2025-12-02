@@ -1,7 +1,9 @@
 using CosmoRate.Api.Data;
+using CosmoRate.Api.Models;
 using CosmoRate.Api.Services;
 using CosmoRate.Api.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models; 
@@ -44,7 +46,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Wpisz token w formacie: Bearer {twój_token}"
+        Description = "Wpisz token w formacie: Bearer {twï¿½j_token}"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -67,6 +69,7 @@ builder.Services.AddSwaggerGen(c =>
 // 3. Nasze serwisy
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 
 // 4. AUTH / JWT

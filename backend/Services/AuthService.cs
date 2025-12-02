@@ -1,6 +1,7 @@
 ﻿using CosmoRate.Api.Data;
 using CosmoRate.Api.DTOs;
 using CosmoRate.Api.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,11 +15,13 @@ public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
     private readonly IConfiguration _config;
+    private readonly IPasswordHasher<User> _hasher;
 
-    public AuthService(AppDbContext db, IConfiguration config)
+    public AuthService(AppDbContext db, IConfiguration config, IPasswordHasher<User> hasher)
     {
         _db = db;
         _config = config;
+        _hasher = hasher;
     }
 
     public async Task<(bool ok, string? error, User? user)> RegisterAsync(AuthRegisterDto dto)
@@ -32,14 +35,14 @@ public class AuthService : IAuthService
         var exists = await _db.Users.AnyAsync(u => u.Email == dto.Email);
         if (exists) return (false, "Email already in use.", null);
 
-        // UWAGA: na razie bez hashowania, żeby było prosto
         var user = new User
         {
             Email = dto.Email,
             Username = dto.Username,
-            PasswordHash = dto.Password, 
             Role = "User"
         };
+
+        user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
@@ -52,7 +55,8 @@ public class AuthService : IAuthService
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
         if (user == null) return (false, "Invalid credentials.", null);
 
-        if (user.PasswordHash != dto.Password)
+        var verificationResult = _hasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
+        if (verificationResult == PasswordVerificationResult.Failed)
             return (false, "Invalid credentials.", null);
 
         //klucz 
