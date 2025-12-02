@@ -45,57 +45,62 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="register-page">
-      <h2>Rejestracja</h2>
+    <div className="register-page page">
+      <div className="card auth-card">
+        <div className="page-heading">
+          <p className="eyebrow">Dołącz do CosmoRate</p>
+          <h2>Rejestracja</h2>
+          <p>Załóż konto, dodawaj recenzje i twórz własne listy ulubieńców.</p>
+        </div>
 
-      <form onSubmit={handleSubmit} className="form">
-        <label>
-          E-mail
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
-        <label>
+        <form onSubmit={handleSubmit} className="form">
+          <label>
+            E-mail
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+          <label>
             Nazwa użytkownika
             <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
             />
-        </label>
+          </label>
 
+          <label>
+            Hasło
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
 
-        <label>
-          Hasło
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
+          <label>
+            Powtórz hasło
+            <input
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+            />
+          </label>
 
-        <label>
-          Powtórz hasło
-          <input
-            type="password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            required
-          />
-        </label>
+          {error && <div className="error">{error}</div>}
+          {success && <div className="success">{success}</div>}
 
-        {error && <div className="error">{error}</div>}
-        {success && <div className="success">{success}</div>}
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Rejestrowanie..." : "Zarejestruj się"}
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? "Rejestrowanie..." : "Zarejestruj się"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

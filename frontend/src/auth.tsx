@@ -132,26 +132,4 @@ export const RequireAdmin: React.FC<{ children: ReactElement }> = ({
   return children;
 };
 
-export function getUsernameFromToken(token: string | null): string | null {
-  if (!token) return null;
-
-  try {
-    const [, payloadBase64] = token.split(".");
-    if (!payloadBase64) return null;
-
-    const json = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
-    const payload = JSON.parse(json) as any;
-
-    // próbujemy różne typowe nazwy claimów
-    return (
-      payload.username ||
-      payload.unique_name ||
-      payload.email ||
-      null
-    );
-  } catch (e){
-    console.error("Username decode failed.");
-    return null;
-  }
-}
 

@@ -31,28 +31,38 @@ const ProductsPage: React.FC = () => {
   }, [products, query]);
 
   return (
-    <div className="products-page">
-      <h2>Wyszukiwarka produktów</h2>
-      <p className="products-subtitle">
-        Znajdź kosmetyk po nazwie, marce lub kategorii i sprawdź opinie innych użytkowników.
-      </p>
+    <div className="products-page page">
+      <div className="page-heading">
+        <p className="eyebrow">Biblioteka produktów</p>
+        <h2>Wyszukiwarka produktów</h2>
+        <p>
+          Znajdź kosmetyk po nazwie, marce lub kategorii i sprawdź opinie innych
+          użytkowników.
+        </p>
+      </div>
 
-      {/* pasek wyszukiwania */}
-      <div className="product-search-wrapped">
-        <input
-          type="text"
-          className="product-search-input"
-          placeholder='Szukaj: np. „serum”, „The Ordinary”, „perfumy”…'
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+      <div className="search-card">
+        <div className="input-with-icon">
+          <span className="input-icon" aria-hidden="true">
+            🔍
+          </span>
+          <input
+            type="text"
+            className="input-field"
+            placeholder='Szukaj: np. „serum”, „The Ordinary”, „perfumy”…'
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       {loading && <p>Ładowanie...</p>}
-      {error && <p className="error">{error}</p>}
+      {error && <div className="error">{error}</div>}
 
       {!loading && filtered.length === 0 && (
-        <p>Brak produktów spełniających kryteria wyszukiwania.</p>
+        <p className="products-empty">
+          Brak produktów spełniających kryteria wyszukiwania.
+        </p>
       )}
 
       {!loading && filtered.length > 0 && (

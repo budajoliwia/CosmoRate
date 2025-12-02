@@ -1,6 +1,6 @@
 // src/App.tsx
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Navigate, Link } from "react-router-dom";
+import { Routes, Route, Navigate, NavLink } from "react-router-dom";
 
 import LoginPage from "./components/LoginPage";
 import ProductsPage from "./components/ProductsPage";
@@ -45,126 +45,164 @@ const App: React.FC = () => {
   };
   // ---------------------------------------
 
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    ["nav-link", isActive ? "is-active" : ""].filter(Boolean).join(" ");
+
   return (
     <div className="app">
       <header className="app-header">
-        <div className="app-header-inner">
-          <div className="app-logo">
-            <img
-              src={Logo}
-              alt="CosmoRate logo"
-              className="app-logo-image"
-            />
-            <span className="logo-text">CosmoRate</span>
+        <div className="shell app-header-inner">
+          <div className="brand">
+            <img src={Logo} alt="CosmoRate logo" className="brand-logo" />
+            <div className="brand-copy">
+              <span className="brand-kicker">CosmoRate</span>
+              
+            </div>
           </div>
 
           <nav className="main-nav">
-            <Link to="/products">Produkty</Link>
+            <NavLink to="/products" className={navLinkClass}>
+              Produkty
+            </NavLink>
 
             {isAdmin && (
               <>
-                <Link to="/admin">Panel admina</Link>
-                <Link to="/admin/products">Produkty (admin)</Link>
-                <Link to="/admin/categories">Kategorie (admin)</Link>
-                <Link to="/admin/reviews">Recenzje (admin)</Link>
+                <NavLink to="/admin" className={navLinkClass}>
+                  Panel admina
+                </NavLink>
+                <NavLink to="/admin/products" className={navLinkClass}>
+                  Produkty (admin)
+                </NavLink>
+                <NavLink to="/admin/categories" className={navLinkClass}>
+                  Kategorie (admin)
+                </NavLink>
+                <NavLink to="/admin/reviews" className={navLinkClass}>
+                  Recenzje (admin)
+                </NavLink>
               </>
             )}
 
-            {isAuthenticated ? (
-              <>
-                <Link to="/profile">Mój profil</Link>
-                <button
-                  type="button"
-                  className="nav-button logout-btn"
-                  onClick={logout}
-                >
-                  Wyloguj
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login">Zaloguj</Link>
-                <Link to="/register">Rejestracja</Link>
-              </>
+            {isAuthenticated && (
+              <NavLink to="/profile" className={navLinkClass}>
+                Mój profil
+              </NavLink>
             )}
           </nav>
 
-          <button
-            type="button"
-            className="theme-toggle"
-            onClick={toggleTheme}
-          >
-            {theme === "plum" ? "🌿 Oliwkowy" : "🍇 Śliwkowy"}
-          </button>
+          <div className="header-actions">
+            {isAuthenticated ? (
+              <button
+                type="button"
+                className="logout-btn ghost-button"
+                onClick={logout}
+              >
+                Wyloguj
+              </button>
+            ) : (
+              <>
+                <NavLink to="/login" className={navLinkClass}>
+                  Zaloguj
+                </NavLink>
+                <NavLink to="/register" className={navLinkClass}>
+                  Rejestracja
+                </NavLink>
+              </>
+            )}
+
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={toggleTheme}
+            >
+              {theme === "plum" ? "🌿 Oliwkowy" : "🍇 Śliwkowy"}
+            </button>
+          </div>
         </div>
       </header>
 
+      <section className="app-hero">
+        <div className="shell app-hero-inner">
+          <h1>Odkrywaj produkty beauty z opiniami społeczności</h1>
+          <p>
+            Wybieraj kosmetyki świadomie dzięki transparentnym recenzjom i
+            sprawdzonym rekomendacjom użytkowniczek.
+          </p>
+          <div className="hero-badges">
+            <span className="pill">Recenzje społeczności</span>
+            <span className="pill">Zaufane opinie</span>
+            <span className="pill">Odkrywaj produkty</span>
+          </div>
+        </div>
+      </section>
+
       <main className="app-main">
-        <Routes>
-          <Route path="/" element={<Navigate to="/products" replace />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/products/:id" element={<ProductDetailsPage />} />
+        <div className="shell">
+          <Routes>
+            <Route path="/" element={<Navigate to="/products" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/:id" element={<ProductDetailsPage />} />
 
-          {/* profil tylko dla zalogowanych – możesz dodać RequireAuth, ale zostawiamy tak jak masz */}
-          <Route path="/profile" element={<ProfilePage />} />
+            {/* profil tylko dla zalogowanych – możesz dodać RequireAuth, ale zostawiamy tak jak masz */}
+            <Route path="/profile" element={<ProfilePage />} />
 
-          {/* Admin – prosta ochrona na podstawie isAdmin */}
-          <Route
-            path="/admin"
-            element={
-              isAdmin ? (
-                <AdminDashboardPage />
-              ) : isAuthenticated ? (
-                <Navigate to="/products" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+            {/* Admin – prosta ochrona na podstawie isAdmin */}
+            <Route
+              path="/admin"
+              element={
+                isAdmin ? (
+                  <AdminDashboardPage />
+                ) : isAuthenticated ? (
+                  <Navigate to="/products" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
 
-          <Route
-            path="/admin/products"
-            element={
-              isAdmin ? (
-                <AdminProductsPage />
-              ) : isAuthenticated ? (
-                <Navigate to="/products" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+            <Route
+              path="/admin/products"
+              element={
+                isAdmin ? (
+                  <AdminProductsPage />
+                ) : isAuthenticated ? (
+                  <Navigate to="/products" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
 
-          <Route
-            path="/admin/categories"
-            element={
-              isAdmin ? (
-                <AdminCategoriesPage />
-              ) : isAuthenticated ? (
-                <Navigate to="/products" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+            <Route
+              path="/admin/categories"
+              element={
+                isAdmin ? (
+                  <AdminCategoriesPage />
+                ) : isAuthenticated ? (
+                  <Navigate to="/products" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
 
-          <Route
-            path="/admin/reviews"
-            element={
-              isAdmin ? (
-                <AdminReviewsPage />
-              ) : isAuthenticated ? (
-                <Navigate to="/products" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+            <Route
+              path="/admin/reviews"
+              element={
+                isAdmin ? (
+                  <AdminReviewsPage />
+                ) : isAuthenticated ? (
+                  <Navigate to="/products" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
 
-          <Route path="*" element={<Navigate to="/products" replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/products" replace />} />
+          </Routes>
+        </div>
       </main>
     </div>
   );

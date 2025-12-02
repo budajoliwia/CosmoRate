@@ -3,18 +3,6 @@ import { apiGetMyReviews, apiDeleteMyReview } from "../api";
 import type { MyReviewItem } from "../type";
 import { useAuth } from "../auth";
 
-const statusColor = (status: string) => {
-  switch (status) {
-    case "Approved":
-      return "green";
-    case "Rejected":
-      return "red";
-    case "Pending":
-      return "orange";
-    default:
-      return "gray";
-  }
-};
 
 // spróbujemy wyciągnąć e-mail z tokena, ale jak go nie ma – pokażemy informację
 function getEmailFromToken(token: string | null): string | null {
@@ -55,66 +43,73 @@ const ProfilePage = () => {
   if (loading) return <p>Ładowanie profilu...</p>;
 
   return (
-    <div>
-      <h2>Mój profil</h2>
+    <div className="profile-page page">
+      <div className="card profile-card">
+        <div className="page-heading">
+          <p className="eyebrow">Twoje konto</p>
+          <h2>Mój profil</h2>
+          <p>Podgląd danych konta i historii recenzji.</p>
+        </div>
 
-      {/*  DANE UŻYTKOWNIKA */}
-      <section style={{ marginBottom: "1.5rem" }}>
-        <p>
-          <strong>E-mail:</strong> {email ?? "(brak w tokenie)"}
-        </p>
-        <p>
-          <strong>ID użytkownika:</strong> {user.userId ?? "nieznane"}
-        </p>
-       
-        <p>
-          <strong>Liczba recenzji:</strong> {reviews.length}
-        </p>
-      </section>
+        <section className="info-list">
+          <p>
+            <strong>E-mail:</strong> {email ?? "(brak w tokenie)"}
+          </p>
+          <p>
+            <strong>ID użytkownika:</strong> {user.userId ?? "nieznane"}
+          </p>
+          <p>
+            <strong>Liczba recenzji:</strong> {reviews.length}
+          </p>
+        </section>
 
-      <h3>Moje recenzje</h3>
+        <h3>Moje recenzje</h3>
 
-      {reviews.length === 0 && <p>Nie masz jeszcze recenzji.</p>}
+        {reviews.length === 0 && (
+          <p className="products-empty">Nie masz jeszcze recenzji.</p>
+        )}
 
-      {reviews.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>Produkt</th>
-              <th>Ocena</th>
-              <th>Tytuł</th>
-              <th>Status</th>
-              <th>Data</th>
-              <th>Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reviews.map((r) => (
-              <tr key={r.id}>
-                <td>{r.productName}</td>
-                <td>{r.rating}/5</td>
-                <td>{r.title}</td>
-                <td
-                  style={{
-                    color: statusColor(r.status),
-                    fontWeight: "bold",
-                  }}
-                >
-                  {r.status}
-                </td>
-                <td>{new Date(r.createdAt).toLocaleDateString()}</td>
-                <td>
-                  {r.status === "Pending" ? (
-                    <button onClick={() => handleDelete(r.id)}>Usuń</button>
-                  ) : (
-                    "-"
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        {reviews.length > 0 && (
+          <div className="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Produkt</th>
+                  <th>Ocena</th>
+                  <th>Tytuł</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                  <th>Akcje</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviews.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.productName}</td>
+                    <td>{r.rating}/5</td>
+                    <td>{r.title}</td>
+                    <td>
+                      <span
+                        className={`status-pill status-${r.status.toLowerCase()}`}
+                      >
+                        {r.status}
+                      </span>
+                    </td>
+                    <td>{new Date(r.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      {r.status === "Pending" ? (
+                        <button onClick={() => handleDelete(r.id)}>Usuń</button>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

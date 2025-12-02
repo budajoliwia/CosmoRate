@@ -30,57 +30,69 @@ const AdminDashboardPage: React.FC = () => {
   if (!data) return <div>Brak danych raportu.</div>;
 
   return (
-    <div className="admin-dashboard">
-      <h2>Panel administratora</h2>
+    <div className="admin-dashboard page">
+      <div className="page-heading">
+        <p className="eyebrow">Zarządzanie CosmoRate</p>
+        <h2>Panel administratora</h2>
+        <p>Błyskawiczny podgląd kluczowych metryk i ostatnich zdarzeń.</p>
+      </div>
 
-      <section className="admin-stats">
-        <h3>Statystyki</h3>
-        <ul>
-          <li>
-            Użytkownicy: <strong>{data.users}</strong>
-          </li>
-          <li>
-            Produkty: <strong>{data.products}</strong>
-          </li>
-          <li>
-            Kategorie: <strong>{data.categories}</strong>
-          </li>
-          <li>
-            Recenzje:
-            <ul>
-              <li>
-                Łącznie: <strong>{data.reviews.total}</strong>
-              </li>
-              <li>
-                Oczekujące: <strong>{data.reviews.pending}</strong>
-              </li>
-              <li>
-                Zatwierdzone: <strong>{data.reviews.approved}</strong>
-              </li>
-              <li>
-                Odrzucone: <strong>{data.reviews.rejected}</strong>
-              </li>
-            </ul>
-          </li>
-        </ul>
+      <div className="stats-grid">
+        <div className="stat-card">
+          <span className="stat-label">Użytkownicy</span>
+          <span className="stat-value">{data.users}</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">Produkty</span>
+          <span className="stat-value">{data.products}</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">Kategorie</span>
+          <span className="stat-value">{data.categories}</span>
+        </div>
+      </div>
+
+      <section className="card soft-card stacked-section">
+        <h3>Recenzje</h3>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <span className="stat-label">Łącznie</span>
+            <span className="stat-value">{data.reviews.total}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">Oczekujące</span>
+            <span className="stat-value">{data.reviews.pending}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">Zatwierdzone</span>
+            <span className="stat-value">{data.reviews.approved}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">Odrzucone</span>
+            <span className="stat-value">{data.reviews.rejected}</span>
+          </div>
+        </div>
       </section>
 
-      <section className="admin-logs">
+      <section className="card soft-card stacked-section">
         <h3>Ostatnie logi (10)</h3>
         {data.lastLogs.length === 0 && <p>Brak logów.</p>}
-        <ul>
-          {data.lastLogs.map((log) => (
-            <li key={log.id}>
-              <div>
-                <strong>{log.action}</strong> – {log.details ?? "(brak szczegółów)"}
-              </div>
-              <div>
-                Użytkownik: {log.userId ?? "system"} |{" "}
-                {new Date(log.timestamp).toLocaleString()}
-              </div>
-            </li>
-          ))}
-        </ul>
+        {data.lastLogs.length > 0 && (
+          <ul className="timeline">
+            {data.lastLogs.map((log) => (
+              <li key={log.id} className="timeline-item">
+                <div>
+                  <strong>{log.action}</strong> –{" "}
+                  {log.details ?? "(brak szczegółów)"}
+                </div>
+                <div className="timeline-time">
+                  Użytkownik: {log.userId ?? "system"} |{" "}
+                  {new Date(log.timestamp).toLocaleString()}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

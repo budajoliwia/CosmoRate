@@ -78,46 +78,52 @@ const AdminCategoriesPage: React.FC=() => {
   };
 
   return (
-    <div className="admin-categories-page">
-      <h2>Zarządzanie kategoriami</h2>
+    <div className="admin-categories-page page">
+      <div className="page-heading">
+        <p className="eyebrow">Panel admina</p>
+        <h2>Zarządzanie kategoriami</h2>
+        <p>Porządkuj drzewo kategorii, aby ułatwić wyszukiwanie produktów.</p>
+      </div>
 
-      {loading && <div>Ładowanie...</div>}
+      {loading && <p>Ładowanie...</p>}
       {error && <div className="error">{error}</div>}
 
       {!loading && (
-        <table className="categories-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nazwa</th>
-              <th>Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((c) => (
-              <tr key={c.id}>
-                <td>{c.id}</td>
-                <td>{c.name}</td>
-                <td>
-                  <button type="button" onClick={() => handleEdit(c)}>
-                    Edytuj
-                  </button>{" "}
-                  <button type="button" onClick={() => void handleDelete(c.id)}>
-                    Usuń
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {categories.length === 0 && (
+        <div className="table-card">
+          <table className="categories-table">
+            <thead>
               <tr>
-                <td colSpan={3}>Brak kategorii.</td>
+                <th>ID</th>
+                <th>Nazwa</th>
+                <th>Akcje</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {categories.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.id}</td>
+                  <td>{c.name}</td>
+                  <td>
+                    <button type="button" onClick={() => handleEdit(c)}>
+                      Edytuj
+                    </button>{" "}
+                    <button type="button" onClick={() => void handleDelete(c.id)}>
+                      Usuń
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {categories.length === 0 && (
+                <tr>
+                  <td colSpan={3}>Brak kategorii.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
 
-      <section className="category-form-section">
+      <section className="category-form-section card soft-card">
         <h3>
           {editingId === null
             ? "Nowa kategoria"

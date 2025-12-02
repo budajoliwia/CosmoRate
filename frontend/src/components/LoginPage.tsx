@@ -32,35 +32,42 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="login-page">
-      <h2>Logowanie</h2>
-      <form onSubmit={handleSubmit} className="form">
-        <label>
-          E-mail
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
+    <div className="login-page page">
+      <div className="card auth-card">
+        <div className="page-heading">
+          <p className="eyebrow">Dostęp użytkownika</p>
+          <h2>Logowanie</h2>
+          <p>Zaloguj się, aby pisać recenzje i zarządzać profilem.</p>
+        </div>
 
-        <label>
-          Hasło
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
+        <form onSubmit={handleSubmit} className="form">
+          <label>
+            E-mail
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
 
-        {error && <div className="error">{error}</div>}
+          <label>
+            Hasło
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Logowanie..." : "Zaloguj"}
-        </button>
-      </form>
+          {error && <div className="error">{error}</div>}
+
+          <button type="submit" disabled={loading}>
+            {loading ? "Logowanie..." : "Zaloguj"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

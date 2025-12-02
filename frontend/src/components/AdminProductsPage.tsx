@@ -103,56 +103,64 @@ const AdminProductsPage: React.FC = () => {
   };
 
   return (
-    <div className="admin-products-page">
-      <h2>Zarządzanie produktami</h2>
+    <div className="admin-products-page page">
+      <div className="page-heading">
+        <p className="eyebrow">Panel admina</p>
+        <h2>Zarządzanie produktami</h2>
+        <p>Aktualizuj katalog i kontroluj zdjęcia oraz kategorie.</p>
+      </div>
 
-      {loading && <div>Ładowanie...</div>}
+      {loading && <p>Ładowanie...</p>}
       {error && <div className="error">{error}</div>}
 
-      <table className="products-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nazwa</th>
-            <th>Marka</th>
-            <th>Kategoria</th>
-            <th>Zdjęcie</th>
-            <th>Akcje</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p) => (
-            <tr key={p.id}>
-              <td>{p.id}</td>
-              <td>{p.name}</td>
-              <td>{p.brand}</td>
-              <td>{p.category ?? "-"}</td>
-              <td>
-                {p.imageUrl ? (
-                  <img
-                    src={p.imageUrl}
-                    alt={p.name}
-                    style={{ width: 60, height: 60, objectFit: "cover" }}
-                  />
-                ) : (
-                  "Brak"
-                )}
-              </td>
-              <td>
-                <button onClick={() => void handleEdit(p.id)}>Edytuj</button>{" "}
-                <button onClick={() => void handleDelete(p.id)}>Usuń</button>
-              </td>
-            </tr>
-          ))}
-          {products.length === 0 && (
-            <tr>
-              <td colSpan={6}>Brak produktów.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      {!loading && (
+        <div className="table-card">
+          <table className="products-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nazwa</th>
+                <th>Marka</th>
+                <th>Kategoria</th>
+                <th>Zdjęcie</th>
+                <th>Akcje</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.id}</td>
+                  <td>{p.name}</td>
+                  <td>{p.brand}</td>
+                  <td>{p.category ?? "-"}</td>
+                  <td>
+                    {p.imageUrl ? (
+                      <img
+                        src={p.imageUrl}
+                        alt={p.name}
+                        style={{ width: 60, height: 60, objectFit: "cover" }}
+                      />
+                    ) : (
+                      "Brak"
+                    )}
+                  </td>
+                  <td>
+                    <button onClick={() => void handleEdit(p.id)}>Edytuj</button>{" "}
+                    <button onClick={() => void handleDelete(p.id)}>Usuń</button>
+                  </td>
+                </tr>
+              ))}
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan={6}>Brak produktów.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      <section className="product-form-section">
+      <section className="product-form-section card soft-card">
         <h3>
           {editingId === null ? "Nowy produkt" : `Edytuj produkt #${editingId}`}
         </h3>

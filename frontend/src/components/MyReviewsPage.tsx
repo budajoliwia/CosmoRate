@@ -26,48 +26,64 @@ const MyReviewsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="my-reviews-page">
-      <h2>Moje recenzje</h2>
+    <div className="my-reviews-page page">
+      <div className="card">
+        <div className="page-heading">
+          <p className="eyebrow">Twoja aktywność</p>
+          <h2>Moje recenzje</h2>
+          <p>Śledź postęp moderacji swoich opinii.</p>
+        </div>
 
-      {loading && <div>Ładowanie...</div>}
-      {error && <div className="error">{error}</div>}
+        {loading && <p>Ładowanie...</p>}
+        {error && <div className="error">{error}</div>}
 
-      {!loading && reviews.length === 0 && (
-        <div>Nie dodałaś/eś jeszcze żadnych recenzji.</div>
-      )}
+        {!loading && reviews.length === 0 && (
+          <p className="products-empty">
+            Nie dodałaś/eś jeszcze żadnych recenzji.
+          </p>
+        )}
 
-      {!loading && reviews.length > 0 && (
-        <table className="reviews-table">
-          <thead>
-            <tr>
-              <th>Produkt</th>
-              <th>Ocena</th>
-              <th>Tytuł</th>
-              <th>Status</th>
-              <th>Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reviews.map((r) => (
-              <tr key={r.id}>
-                <td>
-                  {r.productId ? (
-                    <Link to={`/products/${r.productId}`}>
-                      {r.productName ?? "(brak nazwy)"}
-                    </Link>
-                  ) : (
-                    r.productName ?? "(brak nazwy)"
-                  )}
-                </td>
-                <td>{r.rating}/5</td>
-                <td>{r.title}</td>
-                <td>{r.status}</td>
-                <td>{new Date(r.createdAt).toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        {!loading && reviews.length > 0 && (
+          <div className="table-card">
+            <table className="reviews-table">
+              <thead>
+                <tr>
+                  <th>Produkt</th>
+                  <th>Ocena</th>
+                  <th>Tytuł</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviews.map((r) => (
+                  <tr key={r.id}>
+                    <td>
+                      {r.productId ? (
+                        <Link to={`/products/${r.productId}`}>
+                          {r.productName ?? "(brak nazwy)"}
+                        </Link>
+                      ) : (
+                        r.productName ?? "(brak nazwy)"
+                      )}
+                    </td>
+                    <td>{r.rating}/5</td>
+                    <td>{r.title}</td>
+                    <td>
+                      <span
+                        className={`status-pill status-${r.status.toLowerCase()}`}
+                      >
+                        {r.status}
+                      </span>
+                    </td>
+                    <td>{new Date(r.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

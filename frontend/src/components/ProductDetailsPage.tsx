@@ -80,107 +80,113 @@ const ProductDetailsPage: React.FC = () => {
   if (!product) return <p>Produkt nie został znaleziony.</p>;
 
   return (
-    <div className="product-details-page">
-      <h2>{product.name}</h2>
-
-      {/* ZDJĘCIE PRODUKTU */}
-      {product.imageUrl && (
-        <div style={{ marginBottom: "1rem" }}>
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            style={{ maxWidth: "250px", borderRadius: "4px" }}
-          />
+    <div className="product-details-page page">
+      <div className="card product-details-card">
+        <div className="product-media">
+          {product.imageUrl ? (
+            <img src={product.imageUrl} alt={product.name} />
+          ) : (
+            <span className="pill pill-muted">Brak zdjęcia</span>
+          )}
         </div>
-      )}
 
-      <p>
-        <strong>Marka:</strong> {product.brand}
-      </p>
-      <p>
-        <strong>Kategoria:</strong> {product.category ?? "-"}
-      </p>
+        <div className="product-meta">
+          <p className="eyebrow">Szczegóły produktu</p>
+          <h2>{product.name}</h2>
+          <p>
+            <strong>Marka:</strong> {product.brand}
+          </p>
+          <p>
+            <strong>Kategoria:</strong> {product.category ?? "-"}
+          </p>
 
-      <hr />
+          <div className="review-summary">
+            {reviews.length === 0 ? (
+              <span>Brak ocen dla tego produktu.</span>
+            ) : (
+              <>
+                <strong>{averageRating?.toFixed(1)}</strong>
+                <span>/ 5 na podstawie {reviews.length} recenzji</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
-      <h3>Recenzje</h3>
-     <section style={{ marginBottom: "1.5rem" }}>
-  {reviews.length === 0 ? (
-    <p>Brak ocen dla tego produktu.</p>
-  ) : (
-    <p>
-      <strong>Średnia ocena:</strong>{" "}
-      <strong>{averageRating?.toFixed(1)}</strong> / 5{" "}
-      <span style={{ fontSize: "0.9rem", color: "#555" }}>
-        (na podstawie {reviews.length} recenzji)
-      </span>
-    </p>
-  )}
-</section>
-<ul>
-  {reviews.map(r => (
-    <li key={r.id}>
-      <p>
-        <strong>{r.rating}/5 - {r.title}</strong>
-      </p>
-      <p>{r.body}</p>
-      <small>{new Date(r.createdAt).toLocaleDateString()}</small>
-    </li>
-  ))}
-</ul>
+      <div className="card reviews-panel">
+        <h3>Recenzje społeczności</h3>
 
+        {reviews.length > 0 && (
+          <ul className="reviews-list">
+            {reviews.map((r) => (
+              <li key={r.id} className="review-card">
+                <p>
+                  <strong>
+                    {r.rating}/5 – {r.title}
+                  </strong>
+                </p>
+                <p>{r.body}</p>
+                <small>{new Date(r.createdAt).toLocaleDateString()}</small>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      <hr />
+        {reviews.length === 0 && (
+          <p className="products-empty">Nie ma jeszcze recenzji.</p>
+        )}
 
-      {/* Formularz dodawania opinii – tylko dla zalogowanego */}
-      <h3>Dodaj swoją opinię</h3>
-      {!isAuthenticated && (
-        <p>Aby dodać recenzję, musisz być zalogowana/zalogowany.</p>
-      )}
+        <h3>Dodaj swoją opinię</h3>
+        {!isAuthenticated && (
+          <p className="products-empty">
+            Aby dodać recenzję, musisz być zalogowana/zalogowany.
+          </p>
+        )}
 
-      {isAuthenticated && (
-        <form onSubmit={handleAddReview} className="form">
-          <label>
-            Ocena (1–5)
-            <select
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-            >
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
+        {isAuthenticated && (
+          <form onSubmit={handleAddReview} className="form">
+            <label>
+              Ocena (1–5)
+              <select
+                value={rating}
+                onChange={(e) => setRating(Number(e.target.value))}
+              >
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <label>
-            Tytuł
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </label>
+            <label>
+              Tytuł
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </label>
 
-          <label>
-            Treść recenzji
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              required
-              rows={4}
-            />
-          </label>
+            <label>
+              Treść recenzji
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                required
+                rows={4}
+              />
+            </label>
 
-          {reviewMessage && <p>{reviewMessage}</p>}
+            {reviewMessage && <div className="alert info">{reviewMessage}</div>}
 
-          <button type="submit" disabled={savingReview}>
-            {savingReview ? "Zapisywanie..." : "Wyślij recenzję"}
-          </button>
-        </form>
-      )}
+            <button type="submit" disabled={savingReview}>
+              {savingReview ? "Zapisywanie..." : "Wyślij recenzję"}
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 };
