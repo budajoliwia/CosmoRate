@@ -82,7 +82,7 @@ const AdminCategoriesPage: React.FC=() => {
       <div className="page-heading">
         <p className="eyebrow">Panel admina</p>
         <h2>Zarządzanie kategoriami</h2>
-        <p>Porządkuj drzewo kategorii, aby ułatwić wyszukiwanie produktów.</p>
+        <p>Dodaj kategorię, aby ułatwić wyszukiwanie produktów.</p>
       </div>
 
       {loading && <p>Ładowanie...</p>}
